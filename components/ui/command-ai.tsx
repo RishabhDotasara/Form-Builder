@@ -35,11 +35,11 @@ export function CommandDialogMenu() {
 
   return (
     <>
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center ">
         {/* Full input for larger screens */}
-        <div className="hidden sm:flex text-sm text-muted-foreground border items-center justify-center px-2 rounded-md">
+        <div className="hidden sm:flex text-sm text-muted-foreground cursor-pointer border items-center justify-center px-2 rounded-md">
           <Input 
-            className="border-none outline-none" 
+            className="border-none outline-none cursor-pointer ring-none" 
             placeholder="Ask AI.."
             onClick={handleOpen}
           />

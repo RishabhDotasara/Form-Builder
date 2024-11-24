@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -54,17 +54,15 @@ import {
 import SideBar from "@/components/custom/sidebar";
 import { CommandDialogMenu } from "@/components/ui/command-ai";
 import { auth } from "@/lib/firebase";
-
-type QuestionType = "text" | "multipleChoice" | "checkbox" | "imageUpload";
-
-interface Question {
-  id: string;
-  type: QuestionType;
-  question: string;
-  options?: string[];
-}
+import QuestionBlock from "./questions/question";
+import { Question, QuestionType } from "@/types/types";
+import { log } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { getDocumentsForUser } from "@/lib/firestore-utils";
+import { LoadingSkeleton } from "./sidear-loading-skeleton";
 
 export default function Home() {
+  //categories is collections 
   const [categories, setCategories] = useState([
     { name: "Surveys", forms: ["Customer Feedback", "Employee Satisfaction"] },
     { name: "Quizzes", forms: ["Product Knowledge", "Team Building"] },
@@ -73,7 +71,43 @@ export default function Home() {
     { name: "Surveys", forms: ["Customer Feedback", "Employee Satisfaction"] },
     { name: "Quizzes", forms: ["Product Knowledge", "Team Building"] },
   ]);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const {toast} = useToast()
+  const [IsLoading, setIsLoading] = useState<Boolean>(false)
+
+  // A default question to add the form description.
+  const [questions, setQuestions] = useState<Question[]>([
+    {
+      id: Date.now().toString(),
+      question: "Form Description",
+      type: "text",
+      required: true,
+    },
+  ]);
+
+  //functions to get the current categories and forms
+  const getCategories = async ()=>{
+    try 
+    {
+      setIsLoading(true)
+      const c = await getDocumentsForUser("collections", JSON.parse(localStorage.getItem("user") as string).uid)
+      console.log(c)
+      setIsLoading(false)
+    }
+    catch(err)
+    {
+      setIsLoading(false)
+      log(err as string)
+      toast({
+        title:"Error loading Documents",
+        description:"Please Try again!"
+      })
+    }
+  }
+
+  useEffect(()=>{
+    getCategories().then(()=>{console.log("FUnction Done!");
+    })
+  },[])
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(
     null
   );
@@ -88,6 +122,7 @@ export default function Home() {
         type === "multipleChoice" || type === "checkbox"
           ? ["Option 1", "Option 2"]
           : undefined,
+      required: true,
     };
     setQuestions([...questions, newQuestion]);
     setEditingQuestionId(newQuestion.id);
@@ -107,142 +142,51 @@ export default function Home() {
     const isEditing = editingQuestionId === question.id;
 
     return (
-      <motion.div
+      <QuestionBlock
+        question={question}
+        editingQuestionId={editingQuestionId as string}
+        deleteQuestion={deleteQuestion}
+        setEditingQuestionId={setEditingQuestionId}
+        updateQuestion={updateQuestion}
         key={question.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        className="mb-4 p-4 bg-white rounded-lg shadow"
-      >
-        <div className="flex justify-between items-center mb-2">
-          {isEditing ? (
-            <Input
-              value={question.question}
-              onChange={(e) =>
-                updateQuestion(question.id, { question: e.target.value })
-              }
-              className="font-bold text-lg"
-            />
-          ) : (
-            <h3 className="font-bold text-lg">{question.question}</h3>
-          )}
-          <div className="flex space-x-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                setEditingQuestionId(isEditing ? null : question.id)
-              }
-            >
-              {isEditing ? "Save" : "Edit"}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => deleteQuestion(question.id)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        {question.type === "text" && (
-          <Textarea
-            placeholder="Enter your answer"
-            disabled={!isEditing}
-            className="w-full mt-2"
-          />
-        )}
-        {question.type === "multipleChoice" && (
-          <RadioGroup className="space-y-2 mt-2">
-            {question.options?.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <RadioGroupItem
-                  value={option}
-                  id={`${question.id}-${index}`}
-                  disabled={!isEditing}
-                />
-                {isEditing ? (
-                  <Input
-                    value={option}
-                    onChange={(e) => {
-                      const newOptions = [...(question.options || [])];
-                      newOptions[index] = e.target.value;
-                      updateQuestion(question.id, { options: newOptions });
-                    }}
-                    className="flex-grow"
-                  />
-                ) : (
-                  <Label htmlFor={`${question.id}-${index}`}>{option}</Label>
-                )}
-              </div>
-            ))}
-            {isEditing && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  updateQuestion(question.id, {
-                    options: [...(question.options || []), "New Option"],
-                  })
-                }
-              >
-                Add Option
-              </Button>
-            )}
-          </RadioGroup>
-        )}
-        {question.type === "checkbox" && (
-          <div className="space-y-2 mt-2">
-            {question.options?.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`${question.id}-${index}`}
-                  disabled={!isEditing}
-                />
-                {isEditing ? (
-                  <Input
-                    value={option}
-                    onChange={(e) => {
-                      const newOptions = [...(question.options || [])];
-                      newOptions[index] = e.target.value;
-                      updateQuestion(question.id, { options: newOptions });
-                    }}
-                    className="flex-grow"
-                  />
-                ) : (
-                  <Label htmlFor={`${question.id}-${index}`}>{option}</Label>
-                )}
-              </div>
-            ))}
-            {isEditing && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  updateQuestion(question.id, {
-                    options: [...(question.options || []), "New Option"],
-                  })
-                }
-              >
-                Add Option
-              </Button>
-            )}
-          </div>
-        )}
-        {question.type === "imageUpload" && (
-          <div className="mt-2">
-            <Label htmlFor={`${question.id}-image`} className="block mb-2">
-              Upload Image
-            </Label>
-            <Input
-              id={`${question.id}-image`}
-              type="file"
-              accept="image/*"
-              disabled={!isEditing}
-            />
-          </div>
-        )}
-      </motion.div>
+      />
+    );
+  };
+
+  const QuestionTypeSelector = () => {
+    return (
+      <Select onValueChange={(value: QuestionType) => addQuestion(value)}>
+        <SelectTrigger className="w-fit">
+          <PlusCircle className="h-4 w-4 font-light mr-2" />
+          <SelectValue placeholder="Add" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="text">
+            <div className="flex items-center">
+              <AlignLeft className="mr-2 h-4 w-4" />
+              Text Question
+            </div>
+          </SelectItem>
+          <SelectItem value="multipleChoice">
+            <div className="flex items-center">
+              <List className="mr-2 h-4 w-4" />
+              Multiple Choice
+            </div>
+          </SelectItem>
+          <SelectItem value="checkbox">
+            <div className="flex items-center">
+              <CheckSquare className="mr-2 h-4 w-4" />
+              Checkbox
+            </div>
+          </SelectItem>
+          <SelectItem value="imageUpload">
+            <div className="flex items-center">
+              <ImageIcon className="mr-2 h-4 w-4" />
+              Image Upload
+            </div>
+          </SelectItem>
+        </SelectContent>
+      </Select>
     );
   };
 
@@ -279,44 +223,15 @@ export default function Home() {
 
           <main className="p-6">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold mb-6 text-purple-600">
-                {activeForm}
-              </h2>
-              <div className="space-y-4">
+              <div className="flex justify-between">
+                <h2 className="text-3xl font-bold mb-6 text-purple-600">
+                  {activeForm}
+                </h2>
+                {/* <QuestionTypeSelector /> */}
+              </div>
+              <div className="space-y-4 flex flex-col justify-center items-center">
                 {questions.map(renderQuestionBlock)}
-                <Select
-                  onValueChange={(value: QuestionType) => addQuestion(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Add a new question" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="text">
-                      <div className="flex items-center">
-                        <AlignLeft className="mr-2 h-4 w-4" />
-                        Text Question
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="multipleChoice">
-                      <div className="flex items-center">
-                        <List className="mr-2 h-4 w-4" />
-                        Multiple Choice
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="checkbox">
-                      <div className="flex items-center">
-                        <CheckSquare className="mr-2 h-4 w-4" />
-                        Checkbox
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="imageUpload">
-                      <div className="flex items-center">
-                        <ImageIcon className="mr-2 h-4 w-4" />
-                        Image Upload
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <QuestionTypeSelector />
               </div>
             </div>
           </main>

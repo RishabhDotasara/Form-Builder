@@ -74,7 +74,7 @@ export default function LoginPage() {
           className="mt-8 space-y-6"
         >
           <p className="text-center text-sm text-muted-foreground">
-            Your insights are waiting. Let's dive in!
+            Your insights are waiting. Let&apos; dive in!
           </p>
           <Button
             onClick={handleGoogleLogin}
@@ -92,7 +92,7 @@ export default function LoginPage() {
           transition={{ delay: 0.8, duration: 0.5 }}
           className="mt-8 text-center text-sm text-muted-foreground"
         >
-          By signing in, you're ready to create, share, and analyze surveys with ease.
+          By signing in, you&apos;re ready to create, share, and analyze surveys with ease.
         </motion.p>
       </motion.div>
 

@@ -26,6 +26,7 @@ export default function UserMenu() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>()
   useEffect(() => {
+    // @ts-ignore
     const storedUser: User | null = JSON.parse(localStorage.getItem("user"));
     console.log(storedUser)
     setUser(storedUser)
