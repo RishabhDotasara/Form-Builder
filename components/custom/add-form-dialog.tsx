@@ -13,17 +13,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { log } from "@/lib/utils";
-import { addDocument } from "@/lib/firestore-utils";
+import { addDocument, updateDocument } from "@/lib/firestore-utils";
 import { Loader, Loader2 } from "lucide-react";
 
 export function AddFormDialog({
   openDialog,
   setOpen,
-  toCreateFormCategory
+  category,
+  TocategoryData
 }: {
   openDialog: boolean | undefined;
   setOpen: () => void;
-  toCreateFormCategory: string
+  category: string,
+  TocategoryData:any
 }) {
   const [formName, setFormName] = useState("");
   const { toast } = useToast();
@@ -46,13 +48,26 @@ export function AddFormDialog({
     try {
       //prepare the form to save
       setIsSaving(true);
-      const data = {
+      const id = new Date().getTime().toString();
+      const formData = {
+        formId: id,
         name: formName,
         userId: userId,
         questions: []
       };
 
-      const res = await addDocument("forms", data);
+      //this is what goes to forms field in category data
+      const categoryFormData = {
+        formId: id,
+        formName: formName
+      }
+
+      //this is what goes to category collection
+      const newCategoryData = { ...TocategoryData, forms: [...TocategoryData.forms, categoryFormData] }
+
+      const res = await addDocument("forms", formData);
+      //update the category data 
+      const res2 = await updateDocument("category", category, newCategoryData)
       console.log(res);
       setIsSaving(false);
     } catch (err) {
@@ -69,7 +84,6 @@ export function AddFormDialog({
 
   return (
     <Dialog open={openDialog} onOpenChange={setOpen}>
-        {userId}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add Form</DialogTitle>

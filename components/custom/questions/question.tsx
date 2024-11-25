@@ -9,11 +9,14 @@ import TextType from "./questions_types/text";
 import CheckBoxType from "./questions_types/checkbox";
 import ImageUploadType from "./questions_types/imageUpload";
 import MultipleChoiceType from "./questions_types/multipleChoiceType";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { Question } from "@/types/types";
 import { SelectValue } from "@radix-ui/react-select";
-
-
 
 export default function QuestionBlock({
   question,
@@ -21,12 +24,14 @@ export default function QuestionBlock({
   setEditingQuestionId,
   updateQuestion,
   deleteQuestion,
+  updateForm
 }: {
   question?: Question;
   editingQuestionId?: string;
   setEditingQuestionId?: () => void;
   updateQuestion?: () => void;
   deleteQuestion?: () => void;
+  updateForm?: () => void;
 }) {
   const isEditing = editingQuestionId === question.id;
 
@@ -49,12 +54,21 @@ export default function QuestionBlock({
               }
               className="font-bold text-lg "
             />
-            <Select onValueChange={(value:string)=>updateQuestion(question?.id, {required:value==="r" ? true : false})} value={question?.required ? "r" : "nr"}>
+            <Select
+              onValueChange={(value: string) =>
+                updateQuestion(question?.id, {
+                  required: value === "r" ? true : false,
+                })
+              }
+              value={question?.required ? "r" : "nr"}
+            >
               <SelectTrigger className="w-fit">
-                <SelectValue placeholder="Required"/>
+                <SelectValue placeholder="Required" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="r"><span className="text-red-500">*</span></SelectItem>
+                <SelectItem value="r">
+                  <span className="text-red-500">*</span>
+                </SelectItem>
                 <SelectItem value="nr">*</SelectItem>
               </SelectContent>
             </Select>
@@ -66,13 +80,26 @@ export default function QuestionBlock({
           </h3>
         )}
         <div className="flex space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setEditingQuestionId(isEditing ? null : question.id)}
-          >
-            {isEditing ? "Save" : "Edit"}
-          </Button>
+          {isEditing ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setEditingQuestionId(null);
+                updateForm()
+              }}
+            >
+              Save
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEditingQuestionId(question.id)}
+            >
+              Edit
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"

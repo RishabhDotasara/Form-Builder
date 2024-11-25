@@ -6,11 +6,13 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  onSnapshot,
   query,
   updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { Form } from "@/types/types";
 
 async function addDocument(collectionName: string, data: any) {
   try {
@@ -23,19 +25,22 @@ async function addDocument(collectionName: string, data: any) {
   }
 }
 
-async function getAllDocuments(collectionName: string) {
+function getAllDocuments(collectionName: string, callback: Function) {
   try {
-    const querySnapshot = await getDocs(collection(db, collectionName));
-    const data = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    return data;
+    const unsubscribe = onSnapshot(collection(db, collectionName), (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      callback(data);
+    });
+    return unsubscribe; // Unsubscribe function
   } catch (e) {
-    console.error("Error getting documents: ", e);
+    console.error("Error listening to documents: ", e);
     throw e;
   }
 }
+
 
 async function updateDocument(
   collectionName: string,
@@ -63,20 +68,51 @@ async function deleteDocument(collectionName: string, docId: string) {
   }
 }
 
-async function getDocumentsForUser(collectionName: string, userId: string) {
+function getDocumentsForUser(collectionName: string, userId: string, callback: Function) {
   try {
     const q = query(
       collection(db, collectionName),
       where("userId", "==", userId)
     );
-    const querySnapshot = await getDocs(q);
-    const data = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    return data;
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      callback(data);
+    });
+    return unsubscribe; // Unsubscribe function
   } catch (e) {
-    console.error("Error getting documents for user: ", e);
+    console.error("Error listening to user documents: ", e);
+    throw e;
+  }
+}
+
+function getFormByFormId(
+  formId: string,
+  callback: (form: Form | null) => void
+) {
+  try {
+    const q = query(
+      collection(db, "forms"), // Specific to "forms" collection
+      where("formId", "==", formId) // Query where "formId" matches
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      if (!querySnapshot.empty) {
+        // Assuming you only care about the first matching document
+        const doc = querySnapshot.docs[0];
+        const form = { id: doc.id, ...doc.data() } as Form; // Ensure proper typing
+        callback(form);
+      } else {
+        console.log("No matching form found!");
+        callback(null);
+      }
+    });
+
+    return unsubscribe; // Return unsubscribe function for cleanup
+  } catch (e) {
+    console.error("Error fetching form in real-time:", e);
     throw e;
   }
 }
@@ -87,4 +123,5 @@ export {
   deleteDocument,
   getAllDocuments,
   getDocumentsForUser,
+  getFormByFormId
 };

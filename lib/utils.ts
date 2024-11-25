@@ -1,15 +1,15 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import Groq from "groq-sdk";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-
-export function log(text:string)
-{
-  if (process.env.NODE_ENV === "development")
-  {
-    console.log(text)
+export function log(text: string) {
+  if (process.env.NODE_ENV === "development") {
+    console.log(text);
   }
 }
+
+

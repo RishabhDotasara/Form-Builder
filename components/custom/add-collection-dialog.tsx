@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,25 +8,61 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { addDocument } from "@/lib/firestore-utils";
+import { Loader2 } from "lucide-react";
 
-export function AddCollectionDialog({open, setOpen}:{open:boolean | undefined, setOpen:(open:boolean)=>void}) {
+export function AddCollectionDialog({
+  open,
+  setOpen,
+}: {
+  open: boolean | undefined;
+  setOpen: () => void;
+}) {
+  const [collectionName, setCollectionName] = useState("");
+  const { toast } = useToast();
+  const [IsCreating, setIsCreating] = useState(false);
 
-  const [collectionName, setCollectionName] = useState('')
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!collectionName) {
+      toast({
+        title: "Invalid Category Name!",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault()
-    // Here you would typically send the collectionName to your database
-    console.log('Adding collection:', collectionName)
-    setOpen(false)
-    setCollectionName('')
-  }
+    try {
+      setIsCreating(true);
+      const userId = JSON.parse(localStorage.getItem("user") as string).uid;
+      const data = {
+        name: collectionName,
+        forms: [],
+        userId: userId,
+      };
+      const category = await addDocument("category", data);
+      toast({
+        title: `Created ${data.name}`,
+        description: "You can start adding forms.",
+      });
+      setIsCreating(false);
+    } catch (err) {
+      setIsCreating(false);
+      console.log(err);
+      toast({
+        title: "Error Creating the Category",
+        description: "Please Try Again!",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-     
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add Form Collection</DialogTitle>
@@ -49,11 +85,13 @@ export function AddCollectionDialog({open, setOpen}:{open:boolean | undefined, s
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Add Collection</Button>
+            <Button type="submit" disabled={IsCreating}>
+              Add Collection{" "}
+              {IsCreating && <Loader2 className="animate-spin ml-2" />}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-

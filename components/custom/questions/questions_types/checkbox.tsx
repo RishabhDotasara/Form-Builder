@@ -8,7 +8,8 @@ export default function CheckBoxType({
   isEditing,
   options,
   questionId,
-  updateQuestion
+  updateQuestion,
+  
 }: {
   isEditing: Boolean;
   options: string[] | undefined;
@@ -52,6 +53,7 @@ export default function CheckBoxType({
           Add Option
         </Button>
       )}
+
     </div>
   );
 }

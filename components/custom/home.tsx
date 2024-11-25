@@ -18,6 +18,8 @@ import {
   Share2Icon,
   UserPlus,
   UserIcon,
+  Loader2,
+  Save,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -55,63 +57,50 @@ import SideBar from "@/components/custom/sidebar";
 import { CommandDialogMenu } from "@/components/ui/command-ai";
 import { auth } from "@/lib/firebase";
 import QuestionBlock from "./questions/question";
-import { Question, QuestionType } from "@/types/types";
+import { Form, Question, QuestionType } from "@/types/types";
 import { log } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { getDocumentsForUser } from "@/lib/firestore-utils";
+import { getDocumentsForUser, updateDocument } from "@/lib/firestore-utils";
 import { LoadingSkeleton } from "./sidear-loading-skeleton";
+import { QuerySnapshot } from "firebase/firestore";
+import { Large } from "../ui/large";
+import { ShareDialog } from "./share-form";
+import { Groq } from "groq-sdk";
 
 export default function Home() {
-  //categories is collections 
-  const [categories, setCategories] = useState([
-    { name: "Surveys", forms: ["Customer Feedback", "Employee Satisfaction"] },
-    { name: "Quizzes", forms: ["Product Knowledge", "Team Building"] },
-    { name: "Surveys", forms: ["Customer Feedback", "Employee Satisfaction"] },
-    { name: "Quizzes", forms: ["Product Knowledge", "Team Building"] },
-    { name: "Surveys", forms: ["Customer Feedback", "Employee Satisfaction"] },
-    { name: "Quizzes", forms: ["Product Knowledge", "Team Building"] },
-  ]);
-  const {toast} = useToast()
-  const [IsLoading, setIsLoading] = useState<Boolean>(false)
+  //categories is collections
+  const [categories, setCategories] = useState();
+  const { toast } = useToast();
+  const [IsLoading, setIsLoading] = useState<Boolean>(false);
 
   // A default question to add the form description.
-  const [questions, setQuestions] = useState<Question[]>([
-    {
-      id: Date.now().toString(),
-      question: "Form Description",
-      type: "text",
-      required: true,
-    },
-  ]);
-
-  //functions to get the current categories and forms
-  const getCategories = async ()=>{
-    try 
-    {
-      setIsLoading(true)
-      const c = await getDocumentsForUser("collections", JSON.parse(localStorage.getItem("user") as string).uid)
-      console.log(c)
-      setIsLoading(false)
-    }
-    catch(err)
-    {
-      setIsLoading(false)
-      log(err as string)
-      toast({
-        title:"Error loading Documents",
-        description:"Please Try again!"
-      })
-    }
-  }
-
-  useEffect(()=>{
-    getCategories().then(()=>{console.log("FUnction Done!");
-    })
-  },[])
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(
     null
   );
-  const [activeForm, setActiveForm] = useState(categories[0].forms[0]);
+  const [activeForm, setActiveForm] = useState<Form | null>(null);
+  const [isUpdatingForm, setIsUpdatingForm] = useState(false);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") as string);
+    const unsubscribe = getDocumentsForUser(
+      "category",
+      user.uid,
+      (data: any) => {
+        setCategories(data); // Update state with the latest categories
+        console.log(data);
+      }
+    );
+
+    // Cleanup on component unmount
+    return () => {
+      unsubscribe(); // Stop listening when component is unmounted
+    };
+  }, []); // This effect depends on user.uid
+
+  useEffect(() => {
+    setQuestions(activeForm?.questions as Question[]);
+  }, [activeForm]);
 
   const addQuestion = (type: QuestionType) => {
     const newQuestion: Question = {
@@ -128,10 +117,32 @@ export default function Home() {
     setEditingQuestionId(newQuestion.id);
   };
 
-  const updateQuestion = (id: string, updates: Partial<Question>) => {
+  const updateQuestion = async (id: string, updates: Partial<Question>) => {
     setQuestions(
       questions.map((q) => (q.id === id ? { ...q, ...updates } : q))
     );
+  };
+
+  const updateForm = async () => {
+    try {
+      setIsUpdatingForm(true);
+      const res = await updateDocument("forms", activeForm?.id as string, {
+        ...activeForm,
+        questions: questions,
+      });
+      setIsUpdatingForm(false);
+      toast({
+        title: "Success",
+        description: "Form Updated Successfully!",
+      });
+    } catch (err) {
+      setIsUpdatingForm(false);
+      toast({
+        title: "Error",
+        description: "Error updating form",
+        variant: "destructive",
+      });
+    }
   };
 
   const deleteQuestion = (id: string) => {
@@ -148,6 +159,7 @@ export default function Home() {
         deleteQuestion={deleteQuestion}
         setEditingQuestionId={setEditingQuestionId}
         updateQuestion={updateQuestion}
+        updateForm={updateForm}
         key={question.id}
       />
     );
@@ -205,36 +217,68 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <SidebarTrigger className="text-gray-600 hover:text-purple-600" />
               <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <CommandDialogMenu />
+                
+                  {activeForm && (
+                    <div className="relative flex gap-4">
+                      <CommandDialogMenu
+                        setActiveForm={setActiveForm}
+                        activeForm={activeForm}
+                        updateForm={updateForm}
+                      />
+                      <div className="flex gap-4">
+                        <ShareDialog
+                          trigger={
+                            <Button variant={"outline"}>
+                              <Share2Icon />
+                            </Button>
+                          }
+                        />
+
+                        <Button variant={"default"}>
+                          <UserPlus />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                   {/* {JSON.stringify(auth.currentUser)} */}
-                </div>
-                <div className="flex gap-4">
-                  <Button variant={"outline"}>
-                    <Share2Icon />
-                  </Button>
-                  <Button variant={"default"}>
-                    <UserPlus />
-                  </Button>
-                </div>
+              
               </div>
             </div>
           </header>
 
-          <main className="p-6">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex justify-between">
-                <h2 className="text-3xl font-bold mb-6 text-purple-600">
-                  {activeForm}
-                </h2>
-                {/* <QuestionTypeSelector /> */}
+          {activeForm && (
+            <main className="p-6">
+              <div className="max-w-4xl mx-auto">
+                <div className="flex justify-between">
+                  <h2 className="text-3xl font-bold mb-6 text-purple-600">
+                    {activeForm?.name}
+                  </h2>
+                  {/* <QuestionTypeSelector /> */}
+                  <Button
+                    onClick={() => {
+                      updateForm();
+                    }}
+                    disabled={isUpdatingForm}
+                    className="sticky top-8 right-8"
+                  >
+                    {isUpdatingForm && <Loader2 className="animate-spin" />}{" "}
+                    {!isUpdatingForm && <Save />}Save
+                  </Button>
+                </div>
+                <div className="space-y-4 flex flex-col justify-center items-center">
+                  {questions && questions.map(renderQuestionBlock)}
+                  <QuestionTypeSelector />
+                </div>
               </div>
-              <div className="space-y-4 flex flex-col justify-center items-center">
-                {questions.map(renderQuestionBlock)}
-                <QuestionTypeSelector />
-              </div>
+            </main>
+          )}
+          {!activeForm && (
+            <div className="flex items-center justify-center h-4/5">
+              <h1 className="text-6xl text-muted font-bold">
+                No Form Selected
+              </h1>
             </div>
-          </main>
+          )}
         </div>
       </SidebarProvider>
     </div>
