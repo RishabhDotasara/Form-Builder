@@ -100,8 +100,8 @@ export default function SharedFormPage() {
     try
     {
       console.log(formResponses)
-      const user = JSON.parse(localStorage.getItem('user') as string)
-      const res = await updateDocument('forms', form?.id as string, {...form, responses:[{userId:user.uid || "N/A", userName:user.displayName || "N/A", responses:formResponses, dateResponded:new Date().getTime()},...(form?.responses || [])]})
+      const user = JSON.parse(localStorage.getItem('user') as string) || ""
+      const res = await updateDocument('forms', form?.id as string, {...form, responses:[{userId:user.uid ? user.uid:"N/A", userName:user.displayName ? user.displayName:"N/A", responses:formResponses, dateResponded:new Date().getTime()},...(form?.responses || [])]})
       toast({
         title:'Form Submitted!',
         description:'Thank you for your response.',
