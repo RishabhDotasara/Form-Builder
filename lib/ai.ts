@@ -52,7 +52,7 @@ export async function getForm(prompt: string, context?: any) {
       },
       {
         role: "user",
-        content: `${prompt}`,
+        content: `Generate a form, ${prompt}`,
       },
     ],
     model: "mixtral-8x7b-32768",

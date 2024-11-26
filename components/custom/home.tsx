@@ -70,6 +70,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Badge } from "../ui/badge";
 import { ResponsesTab } from "./responses-tab";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   //categories is collections
@@ -85,9 +86,14 @@ export default function Home() {
   const [activeForm, setActiveForm] = useState<Form | null>(null);
   const [isUpdatingForm, setIsUpdatingForm] = useState(false);
   const [activeTab, setActiveTab] = useState("editor");
+  const router = useRouter();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") as string);
+    if (!user)
+    {
+      router.push("/signin")
+    }
     const unsubscribe = getDocumentsForUser(
       "category",
       user.uid,
@@ -291,7 +297,7 @@ export default function Home() {
                     </div>
                   </TabsContent>
                   <TabsContent value="responses" className="mt-6">
-                    <ResponsesTab responses={activeForm.responses}/>
+                    <ResponsesTab responses={activeForm.responses} questions={questions}/>
                   </TabsContent>
                 </Tabs>
               </div>
