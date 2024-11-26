@@ -66,6 +66,7 @@ import { QuerySnapshot } from "firebase/firestore";
 import { Large } from "../ui/large";
 import { ShareDialog } from "./share-form";
 import { Groq } from "groq-sdk";
+import { ScrollArea } from "../ui/scroll-area";
 
 export default function Home() {
   //categories is collections
@@ -110,7 +111,7 @@ export default function Home() {
       options:
         type === "multipleChoice" || type === "checkbox"
           ? ["Option 1", "Option 2"]
-          : undefined,
+          : [],
       required: true,
     };
     setQuestions([...questions, newQuestion]);
@@ -126,6 +127,10 @@ export default function Home() {
   const updateForm = async () => {
     try {
       setIsUpdatingForm(true);
+      console.log({
+        ...activeForm,
+        questions: questions,
+      })
       const res = await updateDocument("forms", activeForm?.id as string, {
         ...activeForm,
         questions: questions,
@@ -217,31 +222,30 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <SidebarTrigger className="text-gray-600 hover:text-purple-600" />
               <div className="flex items-center space-x-4">
-                
+                <div className="relative flex gap-4">
+                  <CommandDialogMenu
+                    setActiveForm={setActiveForm}
+                    activeForm={activeForm}
+                    updateForm={updateForm}
+                  />
                   {activeForm && (
-                    <div className="relative flex gap-4">
-                      <CommandDialogMenu
-                        setActiveForm={setActiveForm}
-                        activeForm={activeForm}
-                        updateForm={updateForm}
+                    <div className="flex gap-4">
+                      <ShareDialog
+                        formId={activeForm.formId}
+                        trigger={
+                          <Button variant={"outline"}>
+                            <Share2Icon />
+                          </Button>
+                        }
                       />
-                      <div className="flex gap-4">
-                        <ShareDialog
-                          trigger={
-                            <Button variant={"outline"}>
-                              <Share2Icon />
-                            </Button>
-                          }
-                        />
 
-                        <Button variant={"default"}>
-                          <UserPlus />
-                        </Button>
-                      </div>
+                      <Button variant={"default"}>
+                        <UserPlus />
+                      </Button>
                     </div>
                   )}
-                  {/* {JSON.stringify(auth.currentUser)} */}
-              
+                </div>
+                {/* {JSON.stringify(auth.currentUser)} */}
               </div>
             </div>
           </header>
@@ -265,8 +269,10 @@ export default function Home() {
                     {!isUpdatingForm && <Save />}Save
                   </Button>
                 </div>
-                <div className="space-y-4 flex flex-col justify-center items-center">
-                  {questions && questions.map(renderQuestionBlock)}
+                <div className="space-y-4 flex flex-col justify-center items-center h-4/5">
+                  <ScrollArea className="w-full">
+                    {questions && questions.map(renderQuestionBlock)}
+                  </ScrollArea>
                   <QuestionTypeSelector />
                 </div>
               </div>

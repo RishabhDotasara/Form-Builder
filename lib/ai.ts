@@ -7,8 +7,8 @@ const groq = new Groq({
 
 const schema = {
   title: { type: "string", additionalProperties: false },
-  question: {
-    type: "object",
+  questions: {
+    type: "array",
     additionalProperties: false,
     properties: {
       id: { type: "string" },
@@ -34,7 +34,7 @@ const schema = {
   },
 };
 
-export async function getForm(prompt: string, context: any) {
+export async function getForm(prompt: string, context?: any) {
   // JSON schema as a string for integration with the prompt
   const jsonSchema = JSON.stringify(schema, null, 4);
 
@@ -52,7 +52,7 @@ export async function getForm(prompt: string, context: any) {
       },
       {
         role: "user",
-        content: `Generate a form with the following prompt: ${prompt}`,
+        content: `${prompt}`,
       },
     ],
     model: "mixtral-8x7b-32768",

@@ -53,7 +53,8 @@ export function AddFormDialog({
         formId: id,
         name: formName,
         userId: userId,
-        questions: []
+        questions: [],
+        responses:[]
       };
 
       //this is what goes to forms field in category data

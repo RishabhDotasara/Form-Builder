@@ -24,7 +24,7 @@ export default function QuestionBlock({
   setEditingQuestionId,
   updateQuestion,
   deleteQuestion,
-  updateForm
+   updateForm
 }: {
   question?: Question;
   editingQuestionId?: string;
@@ -32,7 +32,7 @@ export default function QuestionBlock({
   updateQuestion?: () => void;
   deleteQuestion?: () => void;
   updateForm?: () => void;
-}) {
+}) {         
   const isEditing = editingQuestionId === question.id;
 
   return (
@@ -86,7 +86,6 @@ export default function QuestionBlock({
               size="sm"
               onClick={() => {
                 setEditingQuestionId(null);
-                updateForm()
               }}
             >
               Save

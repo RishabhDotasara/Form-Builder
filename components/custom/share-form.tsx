@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Check, Copy, Share2 } from 'lucide-react'
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Check, Copy, Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,36 +11,40 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-export function ShareDialog({trigger}:{trigger:React.ReactNode}) {
-  const [open, setOpen] = useState(false)
-  const [accessLevel, setAccessLevel] = useState('view')
-  const [copied, setCopied] = useState(false)
+export function ShareDialog({
+  trigger,
+  formId,
+}: {
+  trigger: React.ReactNode;
+  formId: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [accessLevel, setAccessLevel] = useState("view");
+  const [copied, setCopied] = useState(false);
 
-  const shareLink = `${window.location.origin}/form/share/1234`
+  const shareLink = `${window.location.origin}/form/share/${formId}`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareLink).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Share form</DialogTitle>
@@ -67,10 +71,14 @@ export function ShareDialog({trigger}:{trigger:React.ReactNode}) {
             onClick={copyToClipboard}
           >
             <span className="sr-only">Copy</span>
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            {copied ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
           </Button>
         </div>
-        
+
         <DialogFooter className="sm:justify-start">
           <DialogTrigger asChild>
             <Button type="button" variant="secondary">
@@ -80,6 +88,5 @@ export function ShareDialog({trigger}:{trigger:React.ReactNode}) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-

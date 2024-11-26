@@ -62,9 +62,10 @@ async function deleteDocument(collectionName: string, docId: string) {
     const docRef = doc(db, collectionName, docId);
     await deleteDoc(docRef);
     console.log("Document deleted with ID: ", docId);
+    return true
   } catch (e) {
     console.error("Error deleting document: ", e);
-    throw e;
+    throw e
   }
 }
 
@@ -117,11 +118,35 @@ function getFormByFormId(
   }
 }
 
+async function deleteFormByFormId(formId: string) {
+  try {
+    const q = query(
+      collection(db, "forms"), // Specific to "forms" collection
+      where("formId", "==", formId) // Query where "formId" matches
+    );
+
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const docRef = querySnapshot.docs[0].ref;
+      await deleteDoc(docRef);
+      console.log("Form deleted with ID: ", formId);
+      return true;
+    } else {
+      console.log("No matching form found to delete!");
+      return false;
+    }
+  } catch (e) {
+    console.error("Error deleting form: ", e);
+    throw e;
+  }
+}
+
 export {
   addDocument,
   updateDocument,
   deleteDocument,
   getAllDocuments,
   getDocumentsForUser,
-  getFormByFormId
+  getFormByFormId,
+  deleteFormByFormId
 };

@@ -30,6 +30,7 @@ import { getForm } from "@/lib/ai";
 import { Form } from "@/types/types";
 import { title } from "process";
 import { useToast } from "@/hooks/use-toast";
+import { addDocument } from "@/lib/firestore-utils";
 
 export function CommandDialogMenu({
   setActiveForm,
@@ -68,18 +69,30 @@ export function CommandDialogMenu({
     e.preventDefault();
     console.log("AI Prompt submitted:", aiPrompt);
     try {
-      setIsLoadingAnswer(true);
-      const res = await getForm(aiPrompt, activeForm.questions);
-      const json = JSON.parse(res as string);
-      console.log(json);
-      setActiveForm({
-        ...activeForm,
-        questions: [...activeForm.questions, ...json.question],
-      });
-      setAiPrompt("");
-
-      setAiInputVisible(false);
-      setIsLoadingAnswer(false);
+      if (!activeForm)
+      {
+        toast({
+          title:"No Form Selected!",
+          description:"Please select a form to use the AI features.",
+          variant:'destructive'   
+        })
+      }
+      else 
+      {
+        //for if a form is selected.
+        setIsLoadingAnswer(true);
+        const res = await getForm(aiPrompt, activeForm.questions);
+        const json = JSON.parse(res as string);
+        console.log(json);
+        setActiveForm({
+          ...activeForm,
+          questions: [...json.questions],
+        });
+        setAiPrompt("");
+  
+        setAiInputVisible(false);
+        setIsLoadingAnswer(false);
+      }
     } catch (err) {
       setIsLoadingAnswer(false);
       console.log(err);
@@ -103,7 +116,7 @@ export function CommandDialogMenu({
             readOnly
           />
           <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            <span className="text-xs">⌘</span>K
+            <span className="text-xs">⌘</span>J
           </kbd>
         </div>
 

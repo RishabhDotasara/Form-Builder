@@ -22,6 +22,7 @@ import {
   DeleteIcon,
   Library,
   Plus,
+  Trash2Icon,
 } from "lucide-react";
 import { TextGenerateEffect } from "../ui/text-generate-effect";
 import { H4 } from "../ui/h4";
@@ -45,8 +46,9 @@ import { AddCollectionDialog } from "./add-collection-dialog";
 import { Skeleton } from "../ui/skeleton";
 import { log } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { getDocumentByField, getFormByFormId } from "@/lib/firestore-utils";
-import { Form } from "@/types/types";
+import { deleteDocument, deleteFormByFormId, getDocumentByField, getFormByFormId, updateDocument } from "@/lib/firestore-utils";
+import { Category, Form } from "@/types/types";
+import { DeleteConfirmationDialog } from "./delete-confirmation";
 
 export default function SideBar({
   categories,
@@ -54,19 +56,20 @@ export default function SideBar({
   activeForm,
   setActiveForm,
 }: {
-  categories: [];
+  categories: Category[];
   activeForm: any;
   setActiveForm: any;
   setCategories: any;
 }) {
   // const [activeCategory, setActiveCategory] = useState(categories.length > 0 ? categories[0].name : );
   const [toCreateFormCategory, setCreateFormCategory] = useState(""); //id for the form creating category
-  const [toCreateCategoryData, setCategoryData] = useState<any>()
+  const [toCreateCategoryData, setCategoryData] = useState<any>();
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [isLoadingForm, setIsLoadingForm] = useState(false);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [collectionDialogOpen, setCollectionDialogOpen] = useState(false);
-  const {toast} = useToast()
+  const { toast } = useToast();
   //user states
 
   const addForm = (categoryName: string, formName: string) => {
@@ -79,25 +82,75 @@ export default function SideBar({
     );
   };
 
-  const getFormById = async (id:string) => {
+  const getFormById = async (id: string) => {
+    try {
+      setIsLoadingForm(true);
+      //get form from forms collectuion using the formId field using firestore methods
+      const res = await getFormByFormId(id, (data: Form | null) => {
+        setIsLoadingForm(false);
+        setActiveForm(data);
+      });
+      console.log(res);
+      setIsLoadingForm(false);
+    } catch (err) {
+      log("Error fetching Form, try again.");
+      toast({
+        title: "Error Fetching Form.",
+        description: "Please Try Again!",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCollectionDelete = async (id:string)=>{
     try 
     {
-      setIsLoadingForm(true)
-      //get form from forms collectuion using the formId field using firestore methods
-      const res = await getFormByFormId(id, (data:Form | null)=>{
-        setIsLoadingForm(false)
-        setActiveForm(data)
+      //delete the forms first
+      const forms = categories.filter((category:Category)=>category.id === id)[0].forms;
+      forms.forEach(async (form:any)=>{
+        console.log(form)
+        await deleteFormByFormId(form.formId);
       })
-      console.log(res)
-      setIsLoadingForm(false)
+      //now delete the category
+      await deleteDocument('category',id);
+
+      setCategories(categories.filter((category:Category)=>category.id !== id));
+
+      toast({
+        title:"Collection Deleted",
+        description:"Collection and all its forms have been deleted!",
+      })
       
     }
     catch(err)
     {
-      log("Error fetching Form, try again.")
+      console.log(err)
       toast({
-        title:"Error Fetching Form.",
-        description:"Please Try Again!",
+        title:'Error Deleting Collection',
+        description:'Please Try Again!',
+        variant:"destructive"
+      })
+    }
+  }
+
+  const handleFormDeletion = async (formId:string, categoryId:string)=>{
+    try
+    {
+      await deleteFormByFormId(formId);
+      toast({
+        title:'Form Deleted!',
+        description:'Form has been deleted! Refresh to see changes.'
+      })
+      const category = categories.filter((category:Category)=>category.id === categoryId)
+      updateDocument("category", categoryId, {...category,forms:category[0].forms.filter((form:any)=>form.formId !== formId)});
+
+    }
+    catch(err)
+    {
+      console.log(err)
+      toast({
+        title:'Error Deleting Form',
+        description:'Please Try Again!',
         variant:"destructive"
       })
     }
@@ -142,17 +195,26 @@ export default function SideBar({
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {category.forms &&
-                          category.forms.map((form: any) => (
-                            <SidebarMenuItem key={form.formId}>
+                          category.forms.map((form: any, index:number) => (
+                            <div className="flex w-full justify-between" key={index}>
+                            <SidebarMenuItem key={form.formId} className="w-full">
                               <SidebarMenuButton
                                 onClick={() => {
-                                  getFormById(form.formId)
+                                  getFormById(form.formId);
                                 }}
                                 className=" hover:bg-purple-50  text-muted-foreground hover:text-primary"
                               >
                                 <P className="py-2">{form.formName}</P>
                               </SidebarMenuButton>
                             </SidebarMenuItem>
+                            <DeleteConfirmationDialog
+                              title="Are you Sure?"
+                              description="The form will be deleted. This action can't be undone!"
+                              trigger={<Button variant={"ghost"}><Trash2Icon/></Button>}
+                              onDelete={()=>{handleFormDeletion(form.formId, category.id)}}
+                            />
+                            
+                            </div>
                           ))}
 
                         {!category.forms && (
@@ -164,7 +226,7 @@ export default function SideBar({
                             className="w-full justify-start text-muted-foreground hover:text-primary hover:bg-purple-50"
                             onClick={() => {
                               setCreateFormCategory(category.id);
-                              setCategoryData(category)
+                              setCategoryData(category);
                               setFormDialogOpen(true);
                             }}
                           >
@@ -173,18 +235,24 @@ export default function SideBar({
                               Add Form
                             </P>
                           </Button>
-                          <Button
-                            variant="ghost"
-                            className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-red-50"
-                            onClick={() => {
-                              handleCollectionDelete(category.id)
+                          <DeleteConfirmationDialog
+                            title="You sure want to delete this collection?"
+                            description="It will delete all forms in this collection. This can't be undone!"
+                            onDelete={() => {
+                              handleCollectionDelete(category.id);
                             }}
-                          >
-                            <P className="flex justify-between items-center">
-                              <DeleteIcon className="w-4 h-4 mr-2" />
-                              Delete Collection
-                            </P>
-                          </Button>
+                            trigger={
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-red-50"
+                              >
+                                <P className="flex justify-between items-center">
+                                  <DeleteIcon className="w-4 h-4 mr-2" />
+                                  Delete Collection
+                                </P>
+                              </Button>
+                            }
+                          />
                         </SidebarMenuSubItem>
                       </SidebarMenuSub>
                     </CollapsibleContent>

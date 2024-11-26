@@ -1,49 +1,41 @@
-import { useState } from 'react'
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Question } from "@/types/types";
+import UserFacingTextType from "./questions/user-facing/textQuestion";
+import UserFacingCheckBoxType from "./questions/user-facing/checkboxType";
+import UserFacingMultipleType from "./questions/user-facing/multipleType";
+import UserFacingImageType from "./questions/user-facing/imageUploadType";
 
 interface FormQuestionProps {
-  id: string
-  question: string
-  required: boolean
-  type: string
-  onChange: (id: string, value: string) => void
+  question: Question;
+  onChange: (id: string, value: string) => void;
 }
 
-export function FormQuestion({ id, question, required, type, onChange }: FormQuestionProps) {
-  const [value, setValue] = useState('')
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setValue(e.target.value)
-    onChange(id, e.target.value)
-  }
+export function FormQuestion({ question, onChange }: FormQuestionProps) {
 
   return (
-    <div className="mb-6">
-      <Label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">
-        {question}
-        {required && <span className="text-red-500 ml-1">*</span>}
+    <div className="mb-8 pb-4  ">
+      <Label
+        htmlFor={question.id}
+        className="block text-md font-medium text-gray-700 mb-2"
+      >
+        {question.question}
+        {question.required && <span className="text-red-500 ml-1">*</span>}
       </Label>
-      {type === 'text' ? (
-        <Input
-          type="text"
-          id={id}
-          value={value}
-          onChange={handleChange}
-          required={required}
-          className="w-full"
-        />
-      ) : type === 'textarea' ? (
-        <Textarea
-          id={id}
-          value={value}
-          onChange={handleChange}
-          required={required}
-          className="w-full"
-        />
-      ) : null}
+      {question.type === "text" && (
+        <UserFacingTextType onChange={onChange} question={question}/>
+      )}
+      {question.type === "checkbox" && (
+        <UserFacingCheckBoxType onChange={onChange} question={question}/>
+      )}
+      {question.type === "multipleChoice" && (
+        <UserFacingMultipleType onChange={onChange} question={question}/>
+      )}
+      {question.type === "imageUpload" && (
+        <UserFacingImageType onChange={onChange} question={question}/>
+      )}
     </div>
-  )
+  );
 }
-

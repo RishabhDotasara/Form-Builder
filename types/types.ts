@@ -19,4 +19,13 @@ export type Form = {
   userId: string; // User ID associated with the form
   questions: Array<any>; // Array of questions, can specify type if known
   formId: string; // Custom form identifier
+  responses:any[] | undefined
 };
+
+
+export type Category = {
+  id:string,
+  forms:Form[],
+  name:string,
+  userId:string
+}
