@@ -48,6 +48,7 @@ export function ResponsesTab({ responses, questions }: { responses: any[], quest
     try {
       setIsGeneratingExcel(true);
       const jsonData = await prepareData();
+      // @ts-ignore
       const ws = XLSX.utils.json_to_sheet(jsonData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Sheet1");

@@ -187,7 +187,7 @@ export default function SideBar({
               categories.map((category: any, index: number) => (
                 <Collapsible className="group/collapsible" key={index}>
                   <SidebarMenuItem>
-                    <CollapsibleTrigger className="flex justify-between items-center w-full py-2 hover:bg-purple-50 hover:text-primary px-4">
+                    <CollapsibleTrigger className="flex justify-between items-center w-full py-2 hover:bg-purple-50 dark:hover:bg-background hover:text-primary px-4">
                       <Boxes className="h-4 w-4 mr-2" />
                       <Large className="text-semibold">{category.name}</Large>
                       <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />

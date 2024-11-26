@@ -71,6 +71,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Badge } from "../ui/badge";
 import { ResponsesTab } from "./responses-tab";
 import { useRouter } from "next/navigation";
+import { ModeToggle } from "./mode-toggle";
 
 export default function Home() {
   //categories is collections
@@ -238,6 +239,7 @@ export default function Home() {
                     activeForm={activeForm}
                     updateForm={updateForm}
                   />
+                  {/* <ModeToggle/> */}
                   {activeForm && (
                     <div className="flex gap-4">
                       <ShareDialog
@@ -304,8 +306,8 @@ export default function Home() {
             </main>
           )}
           {!activeForm && (
-            <div className="flex items-center justify-center h-4/5">
-              <h1 className="text-6xl text-muted font-bold">
+            <div className="flex items-center justify-center h-4/5 bg-background text-foreground">
+              <h1 className="text-6xl text-muted-foreground font-bold">
                 No Form Selected
               </h1>
             </div>
