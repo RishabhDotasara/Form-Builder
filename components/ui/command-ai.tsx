@@ -1,18 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Calculator,
-  Calendar,
-  CreditCard,
-  Settings,
-  Smile,
-  User,
-  Search,
-  Send,
-  X,
-  Loader2,
-} from "lucide-react";
+import { Calculator, Calendar, CreditCard, Settings, Smile, User, Search, Send, X, Loader2 } from 'lucide-react';
 
 import {
   CommandDialog,
@@ -28,9 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getForm } from "@/lib/ai";
 import { Form } from "@/types/types";
-import { title } from "process";
 import { useToast } from "@/hooks/use-toast";
-import { addDocument } from "@/lib/firestore-utils";
 
 export function CommandDialogMenu({
   setActiveForm,
@@ -69,27 +56,21 @@ export function CommandDialogMenu({
     e.preventDefault();
     console.log("AI Prompt submitted:", aiPrompt);
     try {
-      if (!activeForm)
-      {
+      if (!activeForm) {
         toast({
-          title:"No Form Selected!",
-          description:"Please select a form to use the AI features.",
-          variant:'destructive'   
-        })
-      }
-      else 
-      {
-        //for if a form is selected.
+          title: "No Form Selected!",
+          description: "Please select a form to use the AI features.",
+          variant: "destructive",
+        });
+      } else {
         setIsLoadingAnswer(true);
         const res = await getForm(aiPrompt, activeForm.questions);
         const json = JSON.parse(res as string);
-        // console.log(json);
         setActiveForm({
           ...activeForm,
           questions: [...json.questions],
         });
         setAiPrompt("");
-  
         setAiInputVisible(false);
         setIsLoadingAnswer(false);
       }
@@ -140,34 +121,51 @@ export function CommandDialogMenu({
           />
           <form
             onSubmit={handleAiSubmit}
-            className="relative bg-background rounded-lg shadow-lg overflow-hidden w-full max-w-lg m-4 animate-in fade-in-90 slide-in-from-bottom-10 sm:zoom-in-90 sm:slide-in-from-bottom-0 duration-300"
+            className="relative bg-background rounded-xl shadow-2xl overflow-hidden w-full max-w-3xl m-4 animate-in fade-in-90 slide-in-from-bottom-10 sm:zoom-in-90 sm:slide-in-from-bottom-0 duration-300"
           >
-            <div className="flex items-center border-b px-3">
-              <Smile className="w-5 h-5 text-muted-foreground mr-2" />
-
-              <Input
-                ref={inputRef}
-                className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Ask AI anything..."
-                value={aiPrompt}
-                onChange={(e) => setAiPrompt(e.target.value)}
-              />
-              <Button type="submit" size="icon" variant="ghost">
-                {!isLoadingAnswer && <Send className="h-4 w-4" />}
-                {isLoadingAnswer && (
-                  <Loader2 className="w-5 h-5 text-muted-foreground mr-2 animate-spin" />
-                )}
-                <span className="sr-only">Send AI prompt</span>
-              </Button>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={() => setAiInputVisible(false)}
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close</span>
-              </Button>
+            <div className="flex flex-col p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Smile className="w-8 h-8 text-primary" />
+                  <h2 className="text-2xl font-semibold text-foreground">Ask AI</h2>
+                </div>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setAiInputVisible(false)}
+                  className="h-10 w-10"
+                >
+                  <X className="h-6 w-6" />
+                  <span className="sr-only">Close</span>
+                </Button>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Input
+                  ref={inputRef}
+                  className="flex-1 text-lg border-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary"
+                  placeholder="Ask AI anything..."
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                />
+                <Button type="submit" size="lg" className="h-12 px-6">
+                  {!isLoadingAnswer && (
+                    <>
+                      <Send className="h-5 w-5 mr-2" />
+                      Send
+                    </>
+                  )}
+                  {isLoadingAnswer && (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Processing
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Ask AI to help you with your form creation process. Be specific for better results.
+              </p>
             </div>
           </form>
         </div>
@@ -175,3 +173,4 @@ export function CommandDialogMenu({
     </>
   );
 }
+

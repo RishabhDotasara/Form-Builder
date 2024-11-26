@@ -20,6 +20,7 @@ import {
   ChevronDown,
   Delete,
   DeleteIcon,
+  FileText,
   Library,
   Plus,
   Trash2Icon,
@@ -169,7 +170,8 @@ export default function SideBar({
         setOpen={setCollectionDialogOpen}
       />
       <SidebarHeader className="border border-b-muted">
-        <H3 className="flex justify-center">
+        <H3 className="flex justify-center items-center gap-2">
+          {/* <FileText className=" text-purple-600" /> */}
           <TextGenerateEffect words="FormAI" />
         </H3>
       </SidebarHeader>

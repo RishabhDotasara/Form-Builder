@@ -60,6 +60,8 @@ export default function SharedFormPage() {
   const [formSubmitted, setFormSubmitted] = useState(false)
 
   const handleResponseChange = (id: string, value: string) => {
+    const question = form?.questions.find((q) => q.id === id);
+    console.log(question)
     setFormResponses((prev) => ({ ...prev, [id]: value }));
   };
 
