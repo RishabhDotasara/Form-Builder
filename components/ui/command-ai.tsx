@@ -37,8 +37,8 @@ export function CommandDialogMenu({
   activeForm,
   updateForm,
 }: {
-  setActiveForm: React.Dispatch<React.SetStateAction<Form>>;
-  activeForm: Form;
+  setActiveForm: React.Dispatch<React.SetStateAction<Form | null>>;
+  activeForm: Form | null;
   updateForm: any;
 }) {
   const [open, setOpen] = React.useState(false);
@@ -83,7 +83,7 @@ export function CommandDialogMenu({
         setIsLoadingAnswer(true);
         const res = await getForm(aiPrompt, activeForm.questions);
         const json = JSON.parse(res as string);
-        console.log(json);
+        // console.log(json);
         setActiveForm({
           ...activeForm,
           questions: [...json.questions],

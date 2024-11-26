@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,7 +20,7 @@ export function AddCollectionDialog({
   setOpen,
 }: {
   open: boolean | undefined;
-  setOpen: () => void;
+  setOpen: Dispatch<SetStateAction<boolean>>;
 }) {
   const [collectionName, setCollectionName] = useState("");
   const { toast } = useToast();

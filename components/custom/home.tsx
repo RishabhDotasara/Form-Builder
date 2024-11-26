@@ -67,6 +67,9 @@ import { Large } from "../ui/large";
 import { ShareDialog } from "./share-form";
 import { Groq } from "groq-sdk";
 import { ScrollArea } from "../ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Badge } from "../ui/badge";
+import { ResponsesTab } from "./responses-tab";
 
 export default function Home() {
   //categories is collections
@@ -81,6 +84,7 @@ export default function Home() {
   );
   const [activeForm, setActiveForm] = useState<Form | null>(null);
   const [isUpdatingForm, setIsUpdatingForm] = useState(false);
+  const [activeTab, setActiveTab] = useState("editor");
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") as string);
@@ -130,7 +134,7 @@ export default function Home() {
       console.log({
         ...activeForm,
         questions: questions,
-      })
+      });
       const res = await updateDocument("forms", activeForm?.id as string, {
         ...activeForm,
         questions: questions,
@@ -269,12 +273,27 @@ export default function Home() {
                     {!isUpdatingForm && <Save />}Save
                   </Button>
                 </div>
-                <div className="space-y-4 flex flex-col justify-center items-center h-4/5">
-                  <ScrollArea className="w-full">
-                    {questions && questions.map(renderQuestionBlock)}
-                  </ScrollArea>
-                  <QuestionTypeSelector />
-                </div>
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="editor">Form Editor</TabsTrigger>
+                    <TabsTrigger value="responses">Responses <Badge className="ml-2">{activeForm.responses.length}</Badge></TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="editor" className="mt-6">
+                    <ScrollArea>
+                      {questions && questions.map(renderQuestionBlock)}
+                    </ScrollArea>
+                    <div className="mt-4 w-full flex justify-center">
+                      <QuestionTypeSelector />
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="responses" className="mt-6">
+                    <ResponsesTab responses={activeForm.responses}/>
+                  </TabsContent>
+                </Tabs>
               </div>
             </main>
           )}

@@ -54,8 +54,10 @@ export default function SharedFormPage() {
     id: new Date().getTime().toString(),
   });
   const [form, setForm] = useState<Form | null>(null);
+  const [IsLoadingForm, setIsLoadingForm] = useState(true)
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formSubmitted, setFormSubmitted] = useState(false)
 
   const handleResponseChange = (id: string, value: string) => {
     setFormResponses((prev) => ({ ...prev, [id]: value }));
@@ -63,10 +65,13 @@ export default function SharedFormPage() {
 
   const getUserFacingForm = async (id: string) => {
     try {
+      setIsLoadingForm(true)
       await getFormByFormId(id, (data: Form | null) => {
         console.log(data);
         setForm(data);
       }); //formId
+      
+      
     } catch (err) {
       console.log(err);
       toast({
@@ -78,7 +83,9 @@ export default function SharedFormPage() {
   };
 
   useEffect(() => {
-    getUserFacingForm(formId);
+    getUserFacingForm(formId).then(()=>{
+      setIsLoadingForm(false)
+    });
   }, []);
 
   // useEffect(() => {
@@ -91,13 +98,14 @@ export default function SharedFormPage() {
     try
     {
       console.log(formResponses)
-      const user:User = JSON.parse(localStorage.getItem('user') as string)
-      const res = await updateDocument('forms', form?.id as string, {...form, responses:[...form?.responses, {userId:user.uid, userName:user.displayName, responses:formResponses}]})
+      const user = JSON.parse(localStorage.getItem('user') as string)
+      const res = await updateDocument('forms', form?.id as string, {...form, responses:[{userId:user.uid, userName:user.displayName, responses:formResponses, dateResponded:new Date().toDateString()},...(form?.responses || [])]})
       toast({
         title:'Form Submitted!',
         description:'Thank you for your response.',
       })
       setIsSubmitting(false)
+      setFormSubmitted(true)
     }
     catch(err)
     {
@@ -111,36 +119,66 @@ export default function SharedFormPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            {form?.name}
-          </CardTitle>
-          <CardDescription className="text-center">
-            Please fill out the form below
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent>
-            {form?.questions.map((question: Question) => {
-              return (
-                <FormQuestion
-                  key={question.id}
-                  question={question}
-                  onChange={handleResponseChange}
-                />
-              );
-            })}
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="w-full" disabled={isSubmitting} onClick={handleSubmit}>
-              Submit {isSubmitting && <Loader2 className="animate-spin ml-2"/>}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
-  );
+  if (IsLoadingForm || !form)
+  {
+    return (
+      <div className="h-screen w-full flex items-center justify-center">
+        <Loader2 className="animate-spin h-12 w-12"/>
+      </div>
+    )
+  }
+
+  else 
+  {
+    return (
+      <>
+        {!formSubmitted && (
+          <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-center">
+                {form?.name}
+              </CardTitle>
+              <CardDescription className="text-center">
+                Please fill out the form below
+              </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleSubmit}>
+              <CardContent>
+                {form?.questions.map((question: Question) => {
+                  return (
+                    <FormQuestion
+                      key={question.id}
+                      question={question}
+                      onChange={handleResponseChange}
+                    />
+                  );
+                })}
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" className="w-full" disabled={isSubmitting} onClick={handleSubmit}>
+                  Submit {isSubmitting && <Loader2 className="animate-spin ml-2"/>}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </div>
+        )}
+        {formSubmitted && (
+          <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+            <Card className="max-w-2xl mx-auto">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-center">
+                  {form?.name}
+                </CardTitle>
+                <CardDescription className="text-center">
+                  Thank you for your response!
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        )}
+      </>
+    );
+  }
 }

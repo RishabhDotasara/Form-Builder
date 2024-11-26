@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,7 +23,7 @@ export function AddFormDialog({
   TocategoryData
 }: {
   openDialog: boolean | undefined;
-  setOpen: () => void;
+  setOpen: Dispatch<SetStateAction<boolean>>;
   category: string,
   TocategoryData:any
 }) {

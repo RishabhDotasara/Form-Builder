@@ -1,6 +1,6 @@
 // This should have the question title, which will be common for all of the question types, but the question body will be different.
 
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,16 +28,16 @@ export default function QuestionBlock({
 }: {
   question?: Question;
   editingQuestionId?: string;
-  setEditingQuestionId?: () => void;
-  updateQuestion?: () => void;
-  deleteQuestion?: () => void;
+  setEditingQuestionId?: Dispatch<SetStateAction<string | null>>;
+  updateQuestion?: (id: string, updates: Partial<Question>) => void;
+  deleteQuestion?: (id:string) => void;
   updateForm?: () => void;
 }) {         
-  const isEditing = editingQuestionId === question.id;
+  const isEditing = editingQuestionId === question?.id;
 
   return (
     <motion.div
-      key={question.id}
+      key={question?.id}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -48,14 +48,16 @@ export default function QuestionBlock({
         {isEditing ? (
           <div className="flex justify-between w-full gap-2 mr-2">
             <Input
-              value={question.question}
+              value={question?.question}
               onChange={(e) =>
-                updateQuestion(question.id, { question: e.target.value })
+                // @ts-ignore
+                updateQuestion(question?.id as string, { question: e.target.value })
               }
               className="font-bold text-lg "
             />
             <Select
               onValueChange={(value: string) =>
+                // @ts-ignore
                 updateQuestion(question?.id, {
                   required: value === "r" ? true : false,
                 })
@@ -85,6 +87,7 @@ export default function QuestionBlock({
               variant="ghost"
               size="sm"
               onClick={() => {
+                // @ts-ignore
                 setEditingQuestionId(null);
               }}
             >
@@ -94,6 +97,7 @@ export default function QuestionBlock({
             <Button
               variant="ghost"
               size="sm"
+              // @ts-ignore
               onClick={() => setEditingQuestionId(question.id)}
             >
               Edit
@@ -102,6 +106,7 @@ export default function QuestionBlock({
           <Button
             variant="ghost"
             size="sm"
+            // @ts-ignore
             onClick={() => deleteQuestion(question.id)}
           >
             <Trash2 className="h-4 w-4" />
@@ -116,6 +121,7 @@ export default function QuestionBlock({
           isEditing={isEditing}
           options={question.options}
           questionId={question.id as string}
+          // @ts-ignore
           updateQuestion={updateQuestion}
           key={question.id}
         />
@@ -131,6 +137,7 @@ export default function QuestionBlock({
           isEditing={isEditing}
           options={question.options}
           questionId={question.id}
+          // @ts-ignore
           updateQuestion={updateQuestion}
           key={question.id}
         />

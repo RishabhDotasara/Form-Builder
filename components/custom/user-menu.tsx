@@ -28,7 +28,7 @@ export default function UserMenu() {
   useEffect(() => {
     // @ts-ignore
     const storedUser: User | null = JSON.parse(localStorage.getItem("user"));
-    console.log(storedUser)
+    // console.log(storedUser)
     setUser(storedUser)
   }, []);
   const handleuserLogout = async ()=>{

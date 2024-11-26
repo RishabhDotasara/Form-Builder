@@ -46,7 +46,7 @@ import { AddCollectionDialog } from "./add-collection-dialog";
 import { Skeleton } from "../ui/skeleton";
 import { log } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { deleteDocument, deleteFormByFormId, getDocumentByField, getFormByFormId, updateDocument } from "@/lib/firestore-utils";
+import { deleteDocument, deleteFormByFormId, getFormByFormId, updateDocument } from "@/lib/firestore-utils";
 import { Category, Form } from "@/types/types";
 import { DeleteConfirmationDialog } from "./delete-confirmation";
 
@@ -56,7 +56,7 @@ export default function SideBar({
   activeForm,
   setActiveForm,
 }: {
-  categories: Category[];
+  categories: Category[] | undefined;
   activeForm: any;
   setActiveForm: any;
   setCategories: any;
@@ -74,7 +74,7 @@ export default function SideBar({
 
   const addForm = (categoryName: string, formName: string) => {
     setCategories(
-      categories.map((category: any) =>
+      categories?.map((category: any) =>
         category.name === categoryName
           ? { ...category, forms: [...category.forms, formName] }
           : category
@@ -106,15 +106,15 @@ export default function SideBar({
     try 
     {
       //delete the forms first
-      const forms = categories.filter((category:Category)=>category.id === id)[0].forms;
-      forms.forEach(async (form:any)=>{
+      const forms = categories?.filter((category:Category)=>category.id === id)[0].forms;
+      forms?.forEach(async (form:any)=>{
         console.log(form)
         await deleteFormByFormId(form.formId);
       })
       //now delete the category
       await deleteDocument('category',id);
 
-      setCategories(categories.filter((category:Category)=>category.id !== id));
+      setCategories(categories?.filter((category:Category)=>category.id !== id));
 
       toast({
         title:"Collection Deleted",
@@ -141,8 +141,8 @@ export default function SideBar({
         title:'Form Deleted!',
         description:'Form has been deleted! Refresh to see changes.'
       })
-      const category = categories.filter((category:Category)=>category.id === categoryId)
-      updateDocument("category", categoryId, {...category,forms:category[0].forms.filter((form:any)=>form.formId !== formId)});
+      const category= categories?.filter((category:Category)=>category.id === categoryId)[0]
+      updateDocument("category", categoryId, {...category,forms:category?.forms.filter((form:any)=>form.formId !== formId)});
 
     }
     catch(err)

@@ -20,7 +20,7 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     try {
       const user = await handleLogin()
-      console.log(user)
+      // console.log(user)
       if (user) {
         await localStorage.setItem('user', JSON.stringify(user))
         toast({

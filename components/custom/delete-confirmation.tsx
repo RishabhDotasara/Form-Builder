@@ -18,7 +18,6 @@ interface DeleteConfirmationDialogProps {
   description: string
   onDelete: () => void
   trigger?: React.ReactNode,
-  IsDeleting:boolean
 }
 
 export function DeleteConfirmationDialog({
@@ -26,9 +25,9 @@ export function DeleteConfirmationDialog({
   description,
   onDelete,
   trigger,
-  IsDeleting
 }: DeleteConfirmationDialogProps) {
   const [open, setOpen] = React.useState(false)
+  const [IsDeleting, setIsDeleting] = React.useState(false)
 
   const handleDelete = async () => {
     await onDelete()
