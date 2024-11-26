@@ -206,7 +206,7 @@ export default function SideBar({
                                 }}
                                 className=" hover:bg-purple-50  text-muted-foreground hover:text-primary"
                               >
-                                <P className="py-2">{form.formName}</P>
+                                <P className="py-2">{form.formName.length < 10 ? form.formName : form.formName.substring(0,13)+"..."}</P>
                               </SidebarMenuButton>
                             </SidebarMenuItem>
                             <DeleteConfirmationDialog

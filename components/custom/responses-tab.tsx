@@ -15,23 +15,32 @@ import { useToast } from "@/hooks/use-toast";
 import * as XLSX from "xlsx";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Large } from "../ui/large";
 
 export function ResponsesTab({ responses, questions }: { responses: any[], questions: any[] }) {
   const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
   const { toast } = useToast();
   const totalResponses = responses.length;
-  const lastResponseDate =
-    responses.length > 0 ? responses[0].dateResponded : "N/A";
+  const lastResponseDate = 
+    responses.length > 0 ? new Date(responses[0].dateResponded).toLocaleString() : "N/A";
 
   const prepareData = async () => {
     try {
       const data = responses.map((response: any) => {
-        const { id, ...rest } = {
+        const {id, ...questionResponses} = response.responses
+        const newQuestions = {}
+        Object.keys(questionResponses).map((key:string)=>{
+          const question = questions.find((q:any)=>q.id === key)
+          // console.log(question)
+            newQuestions[question.question] = questionResponses[key]
+        })
+        console.log(newQuestions)
+        const d = {
           "Username": response.userName,
-          ...response.responses,
+          ...newQuestions,
           "Submitted At": new Date(response.dateResponded).toLocaleString()
         }
-        return rest;
+        return d;
       });
       return data;
     } catch (err) {
@@ -126,7 +135,12 @@ export function ResponsesTab({ responses, questions }: { responses: any[], quest
           <Download className="ml-2 h-4 w-4" />
         </Button>
       </div>
-      {multipleChoiceQuestions.map((question) => (
+      {!(responses.length > 0) && (
+        <Large>
+          Not Enough Data
+        </Large>
+      )}
+      {responses.length > 0 && multipleChoiceQuestions.map((question) => (
         <Card key={question.id}>
           <CardHeader>
             <CardTitle>{question.question}</CardTitle>
@@ -139,7 +153,7 @@ export function ResponsesTab({ responses, questions }: { responses: any[], quest
                   color: "hsl(var(--chart-1))",
                 },
               }}
-              className="h-[300px]"
+              
             >
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>

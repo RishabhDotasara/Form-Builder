@@ -1,7 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { Calculator, Calendar, CreditCard, Settings, Smile, User, Search, Send, X, Loader2 } from 'lucide-react';
+import {
+  Calculator,
+  Calendar,
+  CreditCard,
+  Settings,
+  Smile,
+  User,
+  Search,
+  Send,
+  X,
+  Loader2,
+} from "lucide-react";
 
 import {
   CommandDialog,
@@ -66,6 +77,7 @@ export function CommandDialogMenu({
         setIsLoadingAnswer(true);
         const res = await getForm(aiPrompt, activeForm.questions);
         const json = JSON.parse(res as string);
+        console.log(json)
         setActiveForm({
           ...activeForm,
           questions: [...json.questions],
@@ -127,7 +139,9 @@ export function CommandDialogMenu({
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <Smile className="w-8 h-8 text-primary" />
-                  <h2 className="text-2xl font-semibold text-foreground">Ask AI</h2>
+                  <h2 className="text-2xl font-semibold text-foreground">
+                    Ask AI
+                  </h2>
                 </div>
                 <Button
                   type="button"
@@ -148,23 +162,22 @@ export function CommandDialogMenu({
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                 />
-                <Button type="submit" size="lg" className="h-12 px-6">
+                <Button type="submit" className="">
                   {!isLoadingAnswer && (
                     <>
-                      <Send className="h-5 w-5 mr-2" />
-                      Send
+                      <Send className="h-5 w-5" />
                     </>
                   )}
                   {isLoadingAnswer && (
                     <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Processing
+                      <Loader2 className="w-5 h-5 animate-spin" />
                     </>
                   )}
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground">
-                Ask AI to help you with your form creation process. Be specific for better results.
+                Ask AI to help you with your form creation process. Be specific
+                for better results.
               </p>
             </div>
           </form>
@@ -173,4 +186,3 @@ export function CommandDialogMenu({
     </>
   );
 }
-

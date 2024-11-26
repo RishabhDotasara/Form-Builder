@@ -15,7 +15,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { Question } from "@/types/types";
+import { keywords, Question } from "@/types/types";
 import { SelectValue } from "@radix-ui/react-select";
 
 export default function QuestionBlock({
@@ -115,31 +115,31 @@ export default function QuestionBlock({
       </div>
 
       {/* Question Body Part */}
-      {question?.type === "text" && <TextType isEditing={isEditing} />}
-      {question?.type === "checkbox" && (
+      {keywords.text.includes(question?.type as string) && <TextType isEditing={isEditing} />}
+      {keywords.checkbox.includes(question?.type as string) && (
         <CheckBoxType
           isEditing={isEditing}
-          options={question.options}
-          questionId={question.id as string}
+          options={question?.options}
+          questionId={question?.id as string}
           // @ts-ignore
           updateQuestion={updateQuestion}
-          key={question.id}
+          key={question?.id}
         />
       )}
-      {question?.type === "imageUpload" && (
+      {keywords.imageUpload.includes(question?.type as string) && (
         <ImageUploadType
           isEditing={isEditing}
-          questionId={question.id as string}
+          questionId={question?.id as string}
         />
       )}
-      {question?.type === "multipleChoice" && (
+      {keywords.multipleChoice.includes(question?.type as string) && (
         <MultipleChoiceType
           isEditing={isEditing}
-          options={question.options}
-          questionId={question.id}
+          options={question?.options}
+          questionId={question?.id as string}
           // @ts-ignore
           updateQuestion={updateQuestion}
-          key={question.id}
+          key={question?.id}
         />
       )}
     </motion.div>

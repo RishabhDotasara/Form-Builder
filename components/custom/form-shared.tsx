@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Question } from "@/types/types";
+import { keywords, Question } from "@/types/types";
 import UserFacingTextType from "./questions/user-facing/textQuestion";
 import UserFacingCheckBoxType from "./questions/user-facing/checkboxType";
 import UserFacingMultipleType from "./questions/user-facing/multipleType";
@@ -24,16 +24,16 @@ export function FormQuestion({ question, onChange }: FormQuestionProps) {
         {question.question}
         {question.required && <span className="text-red-500 ml-1">*</span>}
       </Label>
-      {question.type === "text" && (
+      {(keywords.text.includes(question.type)) && (
         <UserFacingTextType onChange={onChange} question={question}/>
       )}
-      {question.type === "checkbox" && (
+      {keywords.checkbox.includes(question.type) && (
         <UserFacingCheckBoxType onChange={onChange} question={question}/>
       )}
-      {question.type === "multipleChoice" && (
+      {keywords.multipleChoice.includes(question.type) && (
         <UserFacingMultipleType onChange={onChange} question={question}/>
       )}
-      {question.type === "imageUpload" && (
+      {keywords.imageUpload.includes(question.type) && (
         <UserFacingImageType onChange={onChange} question={question}/>
       )}
     </div>

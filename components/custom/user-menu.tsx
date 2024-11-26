@@ -76,7 +76,7 @@ export default function UserMenu() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
-          <DropdownMenuItem>
+          {/* <DropdownMenuItem>
             <UserIcon className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </DropdownMenuItem>
@@ -88,7 +88,7 @@ export default function UserMenu() {
             <HelpCircle className="mr-2 h-4 w-4" />
             <span>Help</span>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator /> */}
           <DropdownMenuItem onClick={handleuserLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>

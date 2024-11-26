@@ -48,6 +48,7 @@ export async function getForm(prompt: string, context?: any) {
         content: `You are a form generator that outputs questions in JSON format.\n` +
                  `There must be at least three questions that make sense based on the provided prompt.\n` +
                  `Guide the form generation using the collection of previous questions:\n ${JSON.stringify(context, null, 2)}\n` +
+                 `Only options allowed in type field are ["text", "multipleChoice", "checkbox", "imageUpload"], strictly follow the type names.\n`+
                  `The JSON object must use the following schema:\n ${jsonSchema}`,
       },
       {

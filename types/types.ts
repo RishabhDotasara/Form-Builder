@@ -1,8 +1,9 @@
 export type QuestionType =
-  | "text"
+  | "text" 
   | "multipleChoice"
   | "checkbox"
   | "imageUpload"
+  | "textarea"
   | "description";
 
 export interface Question {
@@ -34,4 +35,12 @@ export type Category = {
   forms:Form[],
   name:string,
   userId:string
+}
+
+//expected types from the ai for input type
+export const keywords = {
+  "text":["text", "textarea"],
+  "imageUpload":["imageUpload"],
+  "multipleChoice":["multipleChoice"],
+  "checkbox":["checkbox"]
 }
