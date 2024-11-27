@@ -50,6 +50,7 @@ export function AddCollectionDialog({
         description: "You can start adding forms.",
       });
       setIsCreating(false);
+      setOpen(false)
     } catch (err) {
       setIsCreating(false);
       console.log(err);

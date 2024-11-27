@@ -8,6 +8,7 @@ export default function UserFacingTextType({onChange, question}:{onChange:(id:st
         <Textarea
           placeholder="Enter your answer"
           className="w-full mt-2"
+          required={question.required}
           onChange={(e) => onChange(question.id, e.target.value)}
         />
   );

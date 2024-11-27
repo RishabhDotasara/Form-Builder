@@ -17,6 +17,8 @@ import { getFormByFormId, updateDocument } from "@/lib/firestore-utils";
 import { Form, Question } from "@/types/types";
 import { Loader2 } from "lucide-react";
 import { User } from "firebase/auth";
+import { log } from "@/lib/utils";
+import { Large } from "@/components/ui/large";
 
 interface FormData {
   id: string;
@@ -54,26 +56,24 @@ export default function SharedFormPage() {
     id: new Date().getTime().toString(),
   });
   const [form, setForm] = useState<Form | null>(null);
-  const [IsLoadingForm, setIsLoadingForm] = useState(true)
+  const [IsLoadingForm, setIsLoadingForm] = useState(true);
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formSubmitted, setFormSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   const handleResponseChange = (id: string, value: string) => {
     const question = form?.questions.find((q) => q.id === id);
-    console.log(question)
+    // console.log(question)
     setFormResponses((prev) => ({ ...prev, [id]: value }));
   };
 
   const getUserFacingForm = async (id: string) => {
     try {
-      setIsLoadingForm(true)
+      setIsLoadingForm(true);
       await getFormByFormId(id, (data: Form | null) => {
-        console.log(data);
+        log(data);
         setForm(data);
       }); //formId
-      
-      
     } catch (err) {
       console.log(err);
       toast({
@@ -85,8 +85,8 @@ export default function SharedFormPage() {
   };
 
   useEffect(() => {
-    getUserFacingForm(formId).then(()=>{
-      setIsLoadingForm(false)
+    getUserFacingForm(formId).then(() => {
+      setIsLoadingForm(false);
     });
   }, []);
 
@@ -94,77 +94,139 @@ export default function SharedFormPage() {
   //   console.log(formResponses);
   // }, [formResponses]);
 
+  const validateResponses = async () => {
+    try {
+      log(formResponses);
+
+      if (Object.keys(formResponses).length < 2)
+      {
+        return false
+      }
+
+      // Extract the questions from responses (skip `id` or other metadata)
+      const { id, ...responses } = formResponses;
+
+      if (!form?.questions) {
+        log("Form or questions data is missing.");
+        return false;
+      }
+
+      // Validate required questions
+      const requiredQuestions = form?.questions.filter((question:Question)=>question.required)
+      const invalidQuestions = requiredQuestions.filter((question:Question)=>{
+        if (!(responses[question.id].length > 0))
+        {
+          return question
+        }
+      })
+
+      if (invalidQuestions.length > 0) {
+        log(
+          `Invalid questions: ${invalidQuestions.map((q) => q.id).join(", ")}`
+        );
+        return false;
+      }
+
+      return true; // All validations passed
+    } catch (err) {
+      log("Error during validation:" + err);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true)
-    try
-    {
-      console.log(formResponses)
-      const user = JSON.parse(localStorage.getItem('user') as string) || ""
-      const res = await updateDocument('forms', form?.id as string, {...form, responses:[{userId:user.uid ? user.uid:"N/A", userName:user.displayName ? user.displayName:"N/A", responses:formResponses, dateResponded:new Date().getTime()},...(form?.responses || [])]})
+
+    try {
+      const isValid = await validateResponses();
+      if (!isValid) {
+        toast({
+          title: "Incorrect Responses!",
+          description: "Please Check Your Resposes.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setIsSubmitting(true);
+      log(formResponses);
+      const user = JSON.parse(localStorage.getItem("user") as string) || "";
+      const res = await updateDocument("forms", form?.id as string, {
+        ...form,
+        responses: [
+          {
+            userId: user.uid ? user.uid : "N/A",
+            userName: user.displayName ? user.displayName : "N/A",
+            responses: formResponses,
+            dateResponded: new Date().getTime(),
+          },
+          ...(form?.responses || []),
+        ],
+      });
       toast({
-        title:'Form Submitted!',
-        description:'Thank you for your response.',
-      })
-      setIsSubmitting(false)
-      setFormSubmitted(true)
-    }
-    catch(err)
-    {
-      setIsSubmitting(false)
-      console.log(err)
+        title: "Form Submitted!",
+        description: "Thank you for your response.",
+      });
+      setIsSubmitting(false);
+      setFormSubmitted(true);
+    } catch (err) {
+      setIsSubmitting(false);
+      console.log(err);
       toast({
         title: "Error Submitting Form!",
         description: "Please Try Again.",
         variant: "destructive",
-      })
+      });
     }
   };
 
-  if (IsLoadingForm || !form)
-  {
+  if (IsLoadingForm || !form) {
     return (
       <div className="h-screen w-full flex items-center justify-center">
-        <Loader2 className="animate-spin h-12 w-12"/>
+        <Loader2 className="animate-spin h-12 w-12" />
       </div>
-    )
-  }
-
-  else 
-  {
+    );
+  } else {
     return (
       <>
         {!formSubmitted && (
           <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold text-center">
-                {form?.name}
-              </CardTitle>
-              <CardDescription className="text-center">
-                Please fill out the form below
-              </CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSubmit}>
-              <CardContent>
-                {form?.questions.map((question: Question) => {
-                  return (
-                    <FormQuestion
-                      key={question.id}
-                      question={question}
-                      onChange={handleResponseChange}
-                    />
-                  );
-                })}
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" className="w-full" disabled={isSubmitting} onClick={handleSubmit}>
-                  Submit {isSubmitting && <Loader2 className="animate-spin ml-2"/>}
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-        </div>
+            <Card className="max-w-2xl mx-auto">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-center">
+                  {form?.name}
+                </CardTitle>
+                <CardDescription className="text-center">
+                  Please fill out the form below
+                  <Large><span className="text-red-400">*</span> Required Question</Large> 
+                </CardDescription>
+              </CardHeader>
+              <form onSubmit={handleSubmit}>
+                <CardContent>
+                  {form?.questions.map((question: Question) => {
+                    return (
+                      <FormQuestion
+                        key={question.id}
+                        question={question}
+                        onChange={handleResponseChange}
+                      />
+                    );
+                  })}
+                </CardContent>
+                <CardFooter className="flex flex-col">
+                  
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isSubmitting}
+                    onClick={handleSubmit}
+                  >
+                    Submit{" "}
+                    {isSubmitting && <Loader2 className="animate-spin ml-2" />}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          </div>
         )}
         {formSubmitted && (
           <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">

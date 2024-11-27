@@ -11,6 +11,7 @@ export default function UserFacingImageType({question, onChange}:{question:Quest
         id={`${ question.id}-image`}
         type="file"
         accept="image/*"
+        required={question.required}
       />
     </div>
   )

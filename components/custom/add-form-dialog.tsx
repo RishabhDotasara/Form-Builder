@@ -71,6 +71,7 @@ export function AddFormDialog({
       const res2 = await updateDocument("category", category, newCategoryData)
       console.log(res);
       setIsSaving(false);
+      setOpen(false)
     } catch (err) {
       setIsSaving(false);
       toast({

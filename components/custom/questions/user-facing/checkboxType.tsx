@@ -17,6 +17,7 @@ export default function UserFacingCheckBoxType({
         question.options?.map((option: string, index: number) => (
           <div key={index} className="flex items-center space-x-2">
             <Checkbox
+              required={question.required}
               id={`${question.id}-${index}`}
               checked={selectedOptions.includes(option)}
               onClick={()=>{

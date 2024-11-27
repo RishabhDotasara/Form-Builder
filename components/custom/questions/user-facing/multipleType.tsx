@@ -14,7 +14,7 @@ export default function UserFacingMultipleType({
     const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
     
   return (
-    <RadioGroup>
+    <RadioGroup required={question.required}>
       {question.options?.map((option, index) => (
         <div key={index} className="flex items-center space-x-2">
           <RadioGroupItem value={option} id={`${question.id}-${index}`} onClick={(e)=>{
