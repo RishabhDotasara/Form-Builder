@@ -11,7 +11,7 @@ export interface Question {
   type: QuestionType;
   question: string;
   options?: string[];
-  required?: BinaryDataoolean;
+  required?: boolean;
 }
 
 type FormResponse = {
