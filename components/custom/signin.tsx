@@ -10,6 +10,7 @@ import { FcGoogle } from "react-icons/fc"
 import { auth } from "@/lib/firebase"
 import { useRecoilState } from "recoil"
 import userAtom from "@/atoms/userAtom"
+import { storeUser } from "@/lib/firestore-utils"
 
 export default function LoginPage() {
   
@@ -22,6 +23,11 @@ export default function LoginPage() {
       const user = await handleLogin()
       // console.log(user)
       if (user) {
+        
+        //add the user to the users table.
+        
+        await storeUser(user)
+        
         await localStorage.setItem('user', JSON.stringify(user))
         toast({
           title: "Login Successful!",
@@ -38,14 +44,7 @@ export default function LoginPage() {
     }
   }
 
-  useEffect(()=>{
-    //run this to check if the user is authenticated, send him back!
-    const user = localStorage.getItem("user")
-    if (user)
-    {
-      router.push("/signin")
-    }
-  },[])
+  
 
   return (
     <div className="h-screen w-full bg-gradient-to-br from-primary/20 to-secondary/20 relative flex items-center justify-center overflow-hidden">

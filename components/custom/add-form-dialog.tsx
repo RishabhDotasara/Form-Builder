@@ -15,27 +15,32 @@ import { useToast } from "@/hooks/use-toast";
 import { log } from "@/lib/utils";
 import { addDocument, updateDocument } from "@/lib/firestore-utils";
 import { Loader, Loader2 } from "lucide-react";
+import { Form } from "@/types/types";
+import { useRouter } from "next/navigation";
 
 export function AddFormDialog({
   openDialog,
   setOpen,
   category,
-  TocategoryData
+  TocategoryData,
+
 }: {
   openDialog: boolean | undefined;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  category: string,
-  TocategoryData:any
+  category: string;
+  TocategoryData: any;
+
 }) {
   const [formName, setFormName] = useState("");
   const { toast } = useToast();
-  const [userId, setUserId] = useState<string | undefined>(undefined)
+  const [userId, setUserId] = useState<string | undefined>(undefined);
   const [IsSaving, setIsSaving] = useState(false);
+  const router = useRouter()
 
-    useEffect(()=>{
-        const id = JSON.parse(localStorage.getItem("user") as string).uid
-        setUserId(id)
-    },[])
+  useEffect(() => {
+    localStorage.getItem("user") ? setUserId(JSON.parse(localStorage.getItem("user") || "").uid) : router.push("/signin");
+  }, []);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!formName) {
@@ -49,39 +54,42 @@ export function AddFormDialog({
       //prepare the form to save
       setIsSaving(true);
       const id = new Date().getTime().toString();
-      const formData = {
+      const formData:Omit<Form, "id"> = {
         formId: id,
         name: formName,
-        userId: userId,
+        userId: userId || "",
         questions: [],
-        responses:[]
+        responses: [],
+        collaborators:[]
       };
 
       //this is what goes to forms field in category data
       const categoryFormData = {
         formId: id,
-        formName: formName
-      }
+        formName: formName,
+      };
 
       //this is what goes to category collection
-      const newCategoryData = { ...TocategoryData, forms: [...TocategoryData.forms, categoryFormData] }
+      const newCategoryData = {
+        ...TocategoryData,
+        forms: [...TocategoryData.forms, categoryFormData],
+      };
 
       const res = await addDocument("forms", formData);
-      //update the category data 
-      const res2 = await updateDocument("category", category, newCategoryData)
+      //update the category data
+      const res2 = await updateDocument("category", category, newCategoryData);
       console.log(res);
       setIsSaving(false);
-      setOpen(false)
+      setOpen(false);
     } catch (err) {
       setIsSaving(false);
       toast({
-        title:"Error Creating Form",
-        description:"Please Try Again!",
-        variant:"destructive"
-      })
+        title: "Error Creating Form",
+        description: "Please Try Again!",
+        variant: "destructive",
+      });
       log("Error:" + err);
     }
- 
   };
 
   return (

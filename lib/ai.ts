@@ -1,3 +1,4 @@
+import { getSystemPrompt } from "@/prompts/systemprompt";
 import Groq from "groq-sdk";
 
 const groq = new Groq({
@@ -45,18 +46,14 @@ export async function getForm(prompt: string, context?: any) {
     messages: [
       {
         role: "system",
-        content: `You are a form generator that outputs questions in JSON format.\n` +
-                 `There must be at least three questions that make sense based on the provided prompt.\n` +
-                 `Guide the form generation using the collection of previous questions:\n ${JSON.stringify(context, null, 2)}\n` +
-                 `Only options allowed in type field are ["text", "multipleChoice", "checkbox", "imageUpload"], strictly follow the type names.\n`+
-                 `The JSON object must use the following schema:\n ${jsonSchema}`,
+        content: getSystemPrompt(jsonSchema, context),
       },
       {
         role: "user",
         content: `Generate a form, ${prompt}`,
       },
     ],
-    model: "mixtral-8x7b-32768",
+    model: "llama3-70b-8192",
     temperature: 0,
     stream: false,
     response_format: { type: "json_object" },

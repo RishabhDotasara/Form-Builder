@@ -1,3 +1,5 @@
+import { User } from "firebase/auth";
+
 export type QuestionType =
   | "text" 
   | "multipleChoice"
@@ -20,15 +22,21 @@ type FormResponse = {
   responses: Record<string, string>;
 }
 
+export type Collaborator = User & {
+  role: "editor" | "viewer";
+};
+
 export type Form = {
   id: string; // Firestore document ID
   name: string; // Name of the form
   userId: string; // User ID associated with the form
   questions: Array<any>; // Array of questions, can specify type if known
   formId: string; // Custom form identifier
-  responses:FormResponse[]
+  responses:FormResponse[],
+  collaborators:Collaborator[]
 };
 
+export type sharedForms = {formId:string, formName:string}
 
 export type Category = {
   id:string,

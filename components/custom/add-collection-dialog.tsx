@@ -38,7 +38,7 @@ export function AddCollectionDialog({
 
     try {
       setIsCreating(true);
-      const userId = JSON.parse(localStorage.getItem("user") as string).uid;
+      const userId = JSON.parse(localStorage.getItem("user") as string).uid || "";
       const data = {
         name: collectionName,
         forms: [],

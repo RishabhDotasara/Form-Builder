@@ -57,10 +57,20 @@ import SideBar from "@/components/custom/sidebar";
 import { CommandDialogMenu } from "@/components/ui/command-ai";
 import { auth } from "@/lib/firebase";
 import QuestionBlock from "./questions/question";
-import { Form, Question, QuestionType } from "@/types/types";
+import {
+  Collaborator,
+  Form,
+  Question,
+  QuestionType,
+  sharedForms,
+} from "@/types/types";
 import { log } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { getDocumentsForUser, updateDocument } from "@/lib/firestore-utils";
+import {
+  getAllMyDocuments,
+  getDocumentsForUser,
+  updateDocument,
+} from "@/lib/firestore-utils";
 import { LoadingSkeleton } from "./sidear-loading-skeleton";
 import { QuerySnapshot } from "firebase/firestore";
 import { Large } from "../ui/large";
@@ -72,10 +82,13 @@ import { Badge } from "../ui/badge";
 import { ResponsesTab } from "./responses-tab";
 import { useRouter } from "next/navigation";
 import { ModeToggle } from "./mode-toggle";
+import { AddCollaboratorsDialog } from "./collaborators/collaborators-dialog";
+import { User } from "firebase/auth";
 
 export default function Home() {
   //categories is collections
   const [categories, setCategories] = useState();
+  const [sharedForms, setSharedForms] = useState<sharedForms[] | null>(null);
   const { toast } = useToast();
   const [IsLoading, setIsLoading] = useState<Boolean>(false);
 
@@ -87,14 +100,43 @@ export default function Home() {
   const [activeForm, setActiveForm] = useState<Form | null>(null);
   const [isUpdatingForm, setIsUpdatingForm] = useState(false);
   const [activeTab, setActiveTab] = useState("editor");
+
+  //use at various places to get user info
+  const [user, setUser] = useState<User | null>();
   const router = useRouter();
 
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user") as string);
-    if (!user)
-    {
-      router.push("/signin")
+  const getSharedForms = async () => {
+    try {
+      const user = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user") as string)
+        : "";
+      setUser(user);
+      await getAllMyDocuments(
+        "sharedDocuments",
+        user.uid,
+        (data: sharedForms[]) => {
+          log("Shared Forms: " + [...data]);
+          setSharedForms(data);
+        }
+      );
+    } catch (err) {
+      log(err);
+      toast({
+        title: "Error Fetching Shared Forms",
+        description: "Please Refresh The Page!",
+        variant: "destructive",
+      });
     }
+  };
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") as string) || "";
+    if (!user) {
+      router.push("/signin");
+      return;
+    }
+
+    //get user categories
     const unsubscribe = getDocumentsForUser(
       "category",
       user.uid,
@@ -103,6 +145,9 @@ export default function Home() {
         console.log(data);
       }
     );
+
+    //get sharedForms
+    getSharedForms();
 
     // Cleanup on component unmount
     return () => {
@@ -226,6 +271,7 @@ export default function Home() {
           setCategories={setCategories}
           activeForm={activeForm}
           setActiveForm={setActiveForm}
+          sharedForms={sharedForms}
         />
 
         <div className="flex-1 overflow-auto">
@@ -251,9 +297,16 @@ export default function Home() {
                         }
                       />
 
-                      <Button variant={"default"}>
-                        <UserPlus />
-                      </Button>
+                      {(user && ((activeForm.userId == user.uid))) && (
+                        <AddCollaboratorsDialog
+                          activeForm={activeForm}
+                          trigger={
+                            <Button variant={"default"}>
+                              <UserPlus />
+                            </Button>
+                          }
+                        />
+                      )}
                     </div>
                   )}
                 </div>
@@ -288,7 +341,12 @@ export default function Home() {
                 >
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="editor">Form Editor</TabsTrigger>
-                    <TabsTrigger value="responses">Responses <Badge className="ml-2">{activeForm.responses.length}</Badge></TabsTrigger>
+                    <TabsTrigger value="responses">
+                      Responses{" "}
+                      <Badge className="ml-2">
+                        {activeForm.responses.length}
+                      </Badge>
+                    </TabsTrigger>
                   </TabsList>
                   <TabsContent value="editor" className="mt-6">
                     <ScrollArea>
@@ -299,7 +357,10 @@ export default function Home() {
                     </div>
                   </TabsContent>
                   <TabsContent value="responses" className="mt-6">
-                    <ResponsesTab responses={activeForm.responses} questions={questions}/>
+                    <ResponsesTab
+                      responses={activeForm.responses}
+                      questions={questions}
+                    />
                   </TabsContent>
                 </Tabs>
               </div>

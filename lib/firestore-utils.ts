@@ -8,15 +8,19 @@ import {
   getDocs,
   onSnapshot,
   query,
+  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { Form } from "@/types/types";
+import { User } from "firebase/auth";
 
-async function addDocument(collectionName: string, data: any) {
+async function addDocument(collectionName: string, data: any, docId?: string) {
   try {
-    const docRef = await addDoc(collection(db, collectionName), data);
+    const docRef = docId
+      ? await addDoc(collection(db, collectionName, docId), data)
+      : await addDoc(collection(db, collectionName), data);
     console.log("Document written with ID: ", docRef.id);
     return docRef.id;
   } catch (e) {
@@ -27,7 +31,34 @@ async function addDocument(collectionName: string, data: any) {
 
 function getAllDocuments(collectionName: string, callback: Function) {
   try {
-    const unsubscribe = onSnapshot(collection(db, collectionName), (snapshot) => {
+    const unsubscribe = onSnapshot(
+      collection(db, collectionName),
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        callback(data);
+      }
+    );
+    return unsubscribe; // Unsubscribe function
+  } catch (e) {
+    console.error("Error listening to documents: ", e);
+    throw e;
+  }
+}
+
+function getAllMyDocuments(
+  collectionName: string,
+  userId: string,
+  callback: Function
+) {
+  try {
+    const q = query(
+      collection(db, collectionName),
+      where("userId", "==", userId)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -40,7 +71,6 @@ function getAllDocuments(collectionName: string, callback: Function) {
     throw e;
   }
 }
-
 
 async function updateDocument(
   collectionName: string,
@@ -62,14 +92,18 @@ async function deleteDocument(collectionName: string, docId: string) {
     const docRef = doc(db, collectionName, docId);
     await deleteDoc(docRef);
     console.log("Document deleted with ID: ", docId);
-    return true
+    return true;
   } catch (e) {
     console.error("Error deleting document: ", e);
-    throw e
+    throw e;
   }
 }
 
-function getDocumentsForUser(collectionName: string, userId: string, callback: Function) {
+function getDocumentsForUser(
+  collectionName: string,
+  userId: string,
+  callback: Function
+) {
   try {
     const q = query(
       collection(db, collectionName),
@@ -118,10 +152,10 @@ function getFormByFormId(
   }
 }
 
-async function deleteFormByFormId(formId: string) {
+async function deleteByFormId(formId: string, collectionName:string) {
   try {
     const q = query(
-      collection(db, "forms"), // Specific to "forms" collection
+      collection(db, collectionName), // Specific to "forms" collection
       where("formId", "==", formId) // Query where "formId" matches
     );
 
@@ -141,6 +175,43 @@ async function deleteFormByFormId(formId: string) {
   }
 }
 
+async function deleteByField(collectionName: string, fieldName: string, fieldValue: any) {
+  try {
+    const q = query(
+      collection(db, collectionName), // Specific to "forms" collection
+      where(fieldName, "==", fieldValue) // Query where "formId" matches
+    );
+
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const docRef = querySnapshot.docs[0].ref;
+      await deleteDoc(docRef);
+      console.log("Document deleted with field: ", fieldName, fieldValue);
+      return true;
+    } else {
+      console.log("No matching document found to delete!");
+      return false;
+    }
+  } catch (e) {
+    console.error("Error deleting document: ", e);
+    throw e;
+  }
+}
+
+const storeUser = async (user: User) => {
+  const userData = {
+    displayName: user.displayName,
+    email: user.email,
+    photoURL: user.photoURL,
+    createdAt: new Date().toISOString(),
+    lastLogin: new Date().toISOString(),
+  };
+
+  // The document ID is the user's UID
+  await setDoc(doc(db, "users", user.uid), userData, { merge: true });
+  console.log("User document created or updated");
+};
+
 export {
   addDocument,
   updateDocument,
@@ -148,5 +219,8 @@ export {
   getAllDocuments,
   getDocumentsForUser,
   getFormByFormId,
-  deleteFormByFormId
+  deleteByFormId,
+  storeUser,
+  getAllMyDocuments,
+  deleteByField
 };
