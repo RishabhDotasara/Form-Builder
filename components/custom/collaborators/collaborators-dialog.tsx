@@ -104,6 +104,7 @@ export function AddCollaboratorsDialog({
     try {
       setCollaborators(collaborators.filter((c) => c.uid !== userId));
       await deleteByField("sharedDocuments", "userId", userId);
+      await updateDocument("forms", activeForm.id, {...activeForm, collaborators:collaborators.filter((c) => c.uid !== userId)});
       toast({
         title: "Collaborator removed",
         description: "Refresh the page to see changes",
@@ -154,7 +155,7 @@ export function AddCollaboratorsDialog({
                     </div>
                   </div>
                   <div className="flex items-center">
-                    <select
+                    {/* <select
                       value={collaborator.role}
                       onChange={(e) => {
                         const newRole = e.target.value as "editor" | "viewer";
@@ -170,7 +171,7 @@ export function AddCollaboratorsDialog({
                     >
                       <option value="editor">Editor</option>
                       <option value="viewer">Viewer</option>
-                    </select>
+                    </select> */}
                     <DeleteConfirmationDialog
                       trigger={
                         <Button
