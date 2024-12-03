@@ -5,6 +5,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   query,
@@ -212,7 +213,26 @@ const storeUser = async (user: User) => {
   console.log("User document created or updated");
 };
 
+async function getDocumentById(collectionName: string, docId: string) {
+  try {
+    const docRef = doc(db, collectionName, docId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      console.log("Document data:", docSnap.data());
+      return { id: docSnap.id, ...docSnap.data() };
+    } else {
+      console.log("No such document!");
+      return null;
+    }
+  } catch (e) {
+    console.error("Error getting document:", e);
+    throw e;
+  }
+}
+
 export {
+  getDocumentById,
   addDocument,
   updateDocument,
   deleteDocument,
