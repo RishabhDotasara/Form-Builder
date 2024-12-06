@@ -18,7 +18,7 @@ const schema = {
       },
       type: {
         type: "string",
-        enum: ["text", "multipleChoice", "checkbox", "imageUpload"],
+        enum: ["text", "multipleChoice", "imageUpload"],
       },
       required: {
         type: "boolean",

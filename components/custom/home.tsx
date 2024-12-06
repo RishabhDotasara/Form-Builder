@@ -246,12 +246,6 @@ export default function Home() {
               Multiple Choice
             </div>
           </SelectItem>
-          <SelectItem value="checkbox">
-            <div className="flex items-center">
-              <CheckSquare className="mr-2 h-4 w-4" />
-              Checkbox
-            </div>
-          </SelectItem>
           <SelectItem value="imageUpload">
             <div className="flex items-center">
               <ImageIcon className="mr-2 h-4 w-4" />

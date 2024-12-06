@@ -19,51 +19,33 @@ import { Loader2 } from "lucide-react";
 import { User } from "firebase/auth";
 import { log } from "@/lib/utils";
 import { Large } from "@/components/ui/large";
-
-interface FormData {
-  id: string;
-  question: string;
-  required: boolean;
-  type: string;
-}
-
-// This would typically come from your API or database
-const mockFormData: FormData[] = [
-  {
-    id: "1732471369333",
-    question: "Title of the first test form.",
-    required: true,
-    type: "text",
-  },
-  {
-    id: "1732471369334",
-    question: "Please provide a detailed description.",
-    required: false,
-    type: "textarea",
-  },
-  {
-    id: "1732471369335",
-    question: "What is your favorite color?",
-    required: true,
-    type: "text",
-  },
-];
+import { useForm } from "react-hook-form";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Form as UserForm,
+} from "@/components/ui/form";
 
 export default function SharedFormPage() {
   const params = useParams();
   const formId = params.id as string;
-  const [formResponses, setFormResponses] = useState<Record<string, string>>({
-    id: new Date().getTime().toString(),
-  });
+
   const [form, setForm] = useState<Form | null>(null);
   const [IsLoadingForm, setIsLoadingForm] = useState(true);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
-
+  const [formSchema, setFormSchema] = useState<z.ZodObject<any> | null>(null);
+  
+  
   const handleResponseChange = (id: string, value: string) => {
     const question = form?.questions.find((q) => q.id === id);
-    // console.log(question)
+    console.log(value);
     setFormResponses((prev) => ({ ...prev, [id]: value }));
   };
 
@@ -90,73 +72,51 @@ export default function SharedFormPage() {
     });
   }, []);
 
+  // Dynamically generate the schema when the form is ready
+  useEffect(() => {
+    if (!form) return;
+
+    const internalSchema: Record<string, any> = {};
+    form.questions.forEach((question: Question) => {
+      internalSchema[question.id] = question.required
+        ? z.string().min(1, { message: "Required!" })
+        : z.string().optional();
+    });
+
+    const generatedSchema = z.object(internalSchema);
+    setFormSchema(generatedSchema);
+  }, [form]);
+
+  // Initialize useForm with the dynamically created schema
+  const formForUser = useForm({
+    resolver: formSchema ? zodResolver(formSchema) : undefined,
+    defaultValues: form?.questions.reduce(
+      (acc, question) => ({
+        ...acc,
+        [question.id]: "",
+      }),
+      {}
+    ),
+    mode: "onChange",
+  });
+
   // useEffect(() => {
   //   console.log(formResponses);
   // }, [formResponses]);
 
-  const validateResponses = async () => {
+  const handleSubmit = async (values:  any) => {
+    console.log(values)
     try {
-      log(formResponses);
-
-      if (Object.keys(formResponses).length < 2)
-      {
-        return false
-      }
-
-      // Extract the questions from responses (skip `id` or other metadata)
-      const { id, ...responses } = formResponses;
-
-      if (!form?.questions) {
-        log("Form or questions data is missing.");
-        return false;
-      }
-
-      // Validate required questions
-      const requiredQuestions = form?.questions.filter((question:Question)=>question.required)
-      const invalidQuestions = requiredQuestions.filter((question:Question)=>{
-        if (!(responses[question.id].length > 0))
-        {
-          return question
-        }
-      })
-
-      if (invalidQuestions.length > 0) {
-        log(
-          `Invalid questions: ${invalidQuestions.map((q) => q.id).join(", ")}`
-        );
-        return false;
-      }
-
-      return true; // All validations passed
-    } catch (err) {
-      log("Error during validation:" + err);
-      return false;
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const isValid = await validateResponses();
-      if (!isValid) {
-        toast({
-          title: "Incorrect Responses!",
-          description: "Please Check Your Resposes.",
-          variant: "destructive",
-        });
-        return;
-      }
       setIsSubmitting(true);
-      log(formResponses);
       const user = JSON.parse(localStorage.getItem("user") as string) || "";
+      console.log(values)
       const res = await updateDocument("forms", form?.id as string, {
         ...form,
         responses: [
           {
             userId: user.uid ? user.uid : "N/A",
             userName: user.displayName ? user.displayName : "N/A",
-            responses: formResponses,
+            responses: values,
             dateResponded: new Date().getTime(),
           },
           ...(form?.responses || []),
@@ -188,7 +148,7 @@ export default function SharedFormPage() {
   } else {
     return (
       <>
-        {!formSubmitted && (
+        {!formSubmitted && formForUser && (
           <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
             <Card className="max-w-2xl mx-auto">
               <CardHeader>
@@ -197,34 +157,54 @@ export default function SharedFormPage() {
                 </CardTitle>
                 <CardDescription className="text-center">
                   Please fill out the form below
-                  <Large><span className="text-red-400">*</span> Required Question</Large> 
+                  <Large>
+                    <span className="text-red-400">*</span> Required Question
+                  </Large>
                 </CardDescription>
               </CardHeader>
-              <form onSubmit={handleSubmit}>
-                <CardContent>
-                  {form?.questions.map((question: Question) => {
-                    return (
-                      <FormQuestion
-                        key={question.id}
-                        question={question}
-                        onChange={handleResponseChange}
-                      />
-                    );
-                  })}
-                </CardContent>
-                <CardFooter className="flex flex-col">
-                  
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isSubmitting}
-                    onClick={handleSubmit}
+              <CardContent>
+                <UserForm {...formForUser}>
+                  <form
+                    onSubmit={formForUser.handleSubmit(handleSubmit)}
+                    className="space-y-6 p-2"
                   >
-                    Submit{" "}
-                    {isSubmitting && <Loader2 className="animate-spin ml-2" />}
-                  </Button>
-                </CardFooter>
-              </form>
+                    {form?.questions.map((question: Question) => {
+                      return (
+                        <FormField
+                          control={formForUser.control}
+                          name={question.id}
+                          key={question.id}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                {question.question}
+                                {question.required && (
+                                  <span className="text-red-400">*</span>
+                                )}
+                              </FormLabel>
+                              <FormControl>
+                                <FormQuestion question={question} form={formForUser} {...field}/>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      );
+                    })}
+
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting && (
+                        <Loader2 className="animate-spin mr-2" />
+                      )}
+                      Submit
+                    </Button>
+                  </form>
+                </UserForm>
+              </CardContent>
             </Card>
           </div>
         )}

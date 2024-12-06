@@ -10,31 +10,26 @@ import UserFacingImageType from "./questions/user-facing/imageUploadType";
 
 interface FormQuestionProps {
   question: Question;
-  onChange: (id: string, value: string) => void;
+  form:any
 }
 
-export function FormQuestion({ question, onChange }: FormQuestionProps) {
+export function FormQuestion({ question,form ,  ...rest}: FormQuestionProps) {
 
   return (
-    <div className="mb-8 pb-4  ">
-      <Label
-        htmlFor={question.id}
-        className="block text-md font-medium text-gray-700 mb-2"
-      >
-        {question.question}
-        {question.required && <span className="text-red-500 ml-1">*</span>}
-      </Label>
+    <div>
+    
+
       {(keywords.text.includes(question.type)) && (
-        <UserFacingTextType onChange={onChange} question={question}/>
+        <UserFacingTextType question={question} {...rest}/>
       )}
       {keywords.checkbox.includes(question.type) && (
-        <UserFacingCheckBoxType onChange={onChange} question={question}/>
+        <UserFacingCheckBoxType  question={question} {...rest} form={form}/>
       )}
-      {keywords.multipleChoice.includes(question.type) && (
-        <UserFacingMultipleType onChange={onChange} question={question}/>
-      )}
+      {/* {keywords.multipleChoice.includes(question.type) && (
+        <UserFacingMultipleType  question={question} {...rest} />
+      )} */}
       {keywords.imageUpload.includes(question.type) && (
-        <UserFacingImageType onChange={onChange} question={question}/>
+        <UserFacingImageType question={question} {...rest}/>
       )}
     </div>
   );

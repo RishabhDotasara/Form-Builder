@@ -79,7 +79,11 @@ export function ResponsesTab({ responses, questions }: { responses: any[], quest
   }, [questions]);
 
   const getQuestionStats = (questionId: string) => {
-    const questionResponses = responses.map(r => r.responses[questionId]).filter(Boolean);
+    console.log(responses)
+    const questionResponses = responses.map(r => {
+      if (questionId) return null;
+      return r.responses[questionId];
+    }).filter(Boolean);
     const total = questionResponses.length;
     const counts = questionResponses.reduce((acc, value) => {
       acc[value] = (acc[value] || 0) + 1;
@@ -140,7 +144,7 @@ export function ResponsesTab({ responses, questions }: { responses: any[], quest
           Not Enough Data
         </Large>
       )}
-      {responses.length > 0 && multipleChoiceQuestions.map((question) => (
+      {/* {responses.length > 0 && multipleChoiceQuestions.map((question) => (
         <Card key={question.id}>
           <CardHeader>
             <CardTitle>{question.question}</CardTitle>
@@ -178,7 +182,7 @@ export function ResponsesTab({ responses, questions }: { responses: any[], quest
             </ChartContainer>
           </CardContent>
         </Card>
-      ))}
+      ))} */}
     </div>
   );
 }

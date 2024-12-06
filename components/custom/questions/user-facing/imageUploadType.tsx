@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label'
 import { Question } from '@/types/types'
 import React from 'react'
 
-export default function UserFacingImageType({question, onChange}:{question:Question, onChange:any}) {
+export default function UserFacingImageType({question, ...rest}:{question:Question}) {
   return (
     <div className="mt-2">
     
@@ -11,7 +11,7 @@ export default function UserFacingImageType({question, onChange}:{question:Quest
         id={`${ question.id}-image`}
         type="file"
         accept="image/*"
-        required={question.required}
+        {...rest}
       />
     </div>
   )

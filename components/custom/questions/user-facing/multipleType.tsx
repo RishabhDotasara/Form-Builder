@@ -1,3 +1,4 @@
+import { FormControl, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -6,23 +7,27 @@ import React, { useEffect } from "react";
 
 export default function UserFacingMultipleType({
   question,
-  onChange,
+  ...rest
 }: {
   question: Question;
-  onChange: ( id: string, value: string)=>void;
 }) {
-    const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
-    
   return (
-    <RadioGroup required={question.required}>
+    <RadioGroup
+      required={question.required}
+      // @ts-ignore
+      onValueChange={rest.onChange}
+      // @ts-ignore
+      defaultValue={rest.value}
+    >
       {question.options?.map((option, index) => (
-        <div key={index} className="flex items-center space-x-2">
-          <RadioGroupItem value={option} id={`${question.id}-${index}`} onClick={(e)=>{
-            onChange(question.id, option);
-          }}/>
-
-          <Label htmlFor={`${question.id}-${index}`}>{option}</Label>
-        </div>
+        <FormItem className="flex items-center space-x-3 space-y-0" key={index}>
+        <FormControl>
+          <RadioGroupItem value={option} />
+        </FormControl>
+        <FormLabel className="font-normal">
+          {option}
+        </FormLabel>
+      </FormItem>
       ))}
     </RadioGroup>
   );
