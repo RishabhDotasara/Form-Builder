@@ -42,12 +42,6 @@ export default function SharedFormPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formSchema, setFormSchema] = useState<z.ZodObject<any> | null>(null);
   
-  
-  const handleResponseChange = (id: string, value: string) => {
-    const question = form?.questions.find((q) => q.id === id);
-    console.log(value);
-    setFormResponses((prev) => ({ ...prev, [id]: value }));
-  };
 
   const getUserFacingForm = async (id: string) => {
     try {
