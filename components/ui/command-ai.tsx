@@ -12,6 +12,7 @@ import {
   Send,
   X,
   Loader2,
+  BrainCircuit,
 } from "lucide-react";
 
 import {
@@ -126,62 +127,49 @@ export function CommandDialogMenu({
       </div>
 
       {aiInputVisible && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center sm:items-center">
-          <div
-            className="fixed inset-0 bg-black/50 transition-opacity animate-in fade-in"
-            onClick={() => setAiInputVisible(false)}
-          />
-          <form
-            onSubmit={handleAiSubmit}
-            className="relative bg-background rounded-xl shadow-2xl overflow-hidden w-full max-w-3xl m-4 animate-in fade-in-90 slide-in-from-bottom-10 sm:zoom-in-90 sm:slide-in-from-bottom-0 duration-300"
-          >
-            <div className="flex flex-col p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Smile className="w-8 h-8 text-primary" />
-                  <h2 className="text-2xl font-semibold text-foreground">
-                    Ask AI
-                  </h2>
-                </div>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => setAiInputVisible(false)}
-                  className="h-10 w-10"
-                >
-                  <X className="h-6 w-6" />
-                  <span className="sr-only">Close</span>
-                </Button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+        <div className="w-full max-w-md bg-card rounded-lg shadow-lg overflow-hidden">
+          <form onSubmit={handleAiSubmit} className="flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b">
+              <div className="flex items-center space-x-2">
+                <BrainCircuit className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-medium">Ask AI</h2>
               </div>
-              <div className="flex items-center space-x-4">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={()=>{setAiInputVisible(false)}}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </Button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="flex space-x-2">
                 <Input
                   ref={inputRef}
-                  className="flex-1 text-lg border-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary"
+                  className="flex-1"
                   placeholder="Ask AI anything..."
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                 />
-                <Button type="submit" className="">
-                  {!isLoadingAnswer && (
-                    <>
-                      <Send className="h-5 w-5" />
-                    </>
-                  )}
-                  {isLoadingAnswer && (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    </>
+                <Button type="submit" disabled={isLoadingAnswer}>
+                  {isLoadingAnswer ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
                   )}
                 </Button>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Ask AI to help you with your form creation process. Be specific
-                for better results.
+              <p className="text-xs text-muted-foreground">
+                Ask AI to help you with your form creation process. Be specific for better results.
               </p>
             </div>
           </form>
         </div>
+      </div>
       )}
     </>
   );

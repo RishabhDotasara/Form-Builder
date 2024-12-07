@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,23 +23,28 @@ export function AddFormDialog({
   setOpen,
   category,
   TocategoryData,
+  getForm,
 
 }: {
   openDialog: boolean | undefined;
   setOpen: Dispatch<SetStateAction<boolean>>;
   category: string;
   TocategoryData: any;
-
+  getForm:Function;
 }) {
   const [formName, setFormName] = useState("");
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [IsSaving, setIsSaving] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null)
   const router = useRouter()
 
   useEffect(() => {
     localStorage.getItem("user") ? setUserId(JSON.parse(localStorage.getItem("user") || "").uid) : router.push("/signin");
   }, []);
+
+  
+ 
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -79,6 +84,7 @@ export function AddFormDialog({
       //update the category data
       const res2 = await updateDocument("category", category, newCategoryData);
       // console.log(res);
+      await getForm(id)
       setIsSaving(false);
       setOpen(false);
     } catch (err) {
@@ -110,6 +116,7 @@ export function AddFormDialog({
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 className="col-span-3"
+                ref={inputRef}
               />
             </div>
           </div>

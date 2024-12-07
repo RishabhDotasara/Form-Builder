@@ -61,7 +61,7 @@ export default function UserMenu() {
     <div className="border-t border-border bg-background">
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="themed" className="w-full justify-start px-4 py-8  hover:bg-purple-50 hover:text-primary">
+          <Button variant="ghost" className="w-full justify-start px-4 py-8  hover:bg-purple-50 hover:text-primary">
             <div className="flex items-center justify-between">
               <Avatar className="h-8 w-8 mr-3">
                 <AvatarImage src={user?.photoURL as string} alt={user?.displayName as string} />

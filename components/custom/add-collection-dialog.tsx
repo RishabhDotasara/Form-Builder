@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,6 +25,7 @@ export function AddCollectionDialog({
   const [collectionName, setCollectionName] = useState("");
   const { toast } = useToast();
   const [IsCreating, setIsCreating] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -62,6 +63,21 @@ export function AddCollectionDialog({
     }
   };
 
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && (e.ctrlKey) &&  e.key ===  "c") {
+        e.preventDefault();
+        setOpen((visible) => !visible);
+        if (!open) {
+          setTimeout(() => inputRef.current?.focus(), 0);
+        }
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px]">
@@ -82,6 +98,7 @@ export function AddCollectionDialog({
                 value={collectionName}
                 onChange={(e) => setCollectionName(e.target.value)}
                 className="col-span-3"
+                ref={inputRef}
               />
             </div>
           </div>

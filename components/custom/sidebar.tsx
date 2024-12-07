@@ -93,6 +93,7 @@ export default function SideBar({
     );
   };
 
+  //using formId
   const getFormById = async (id: string) => {
     try {
       setIsLoadingForm(true);
@@ -176,6 +177,7 @@ export default function SideBar({
         setOpen={setFormDialogOpen}
         category={toCreateFormCategory}
         TocategoryData={toCreateCategoryData}
+        getForm={getFormById}
       />
       <AddCollectionDialog
         open={collectionDialogOpen}
@@ -323,7 +325,8 @@ export default function SideBar({
                         onClick={() => {
                           getFormById(form.formId);
                         }}
-                        className=" hover:bg-purple-50  text-muted-foreground hover:text-primary"
+                        variant={"outline"}
+                        // className=" hover:bg-purple-50  text-muted-foreground hover:text-primary"
                       >
                         <P className="py-2 flex items-center gap-2">
                         <File className="h-4 w-4 "/>

@@ -20,6 +20,7 @@ import {
   UserIcon,
   Loader2,
   Save,
+  Keyboard,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -291,7 +292,7 @@ export default function Home() {
                         }
                       />
 
-                      {(user && ((activeForm.userId == user.uid))) && (
+                      {user && activeForm.userId == user.uid && (
                         <AddCollaboratorsDialog
                           activeForm={activeForm}
                           trigger={
@@ -361,10 +362,41 @@ export default function Home() {
             </main>
           )}
           {!activeForm && (
-            <div className="flex items-center justify-center h-4/5 bg-background text-foreground">
-              <h1 className="text-6xl text-muted-foreground font-bold">
-                No Form Selected
-              </h1>
+            <div className="flex flex-col items-center justify-center  h-5/6 bg-background text-foreground p-8">
+              <div className="max-w-md w-full space-y-8 text-center">
+                <p className="text-xl text-muted-foreground">
+                  Hello, {user?.displayName?.split(" ")[0]} 👋
+                </p>
+                <div className="space-y-4 text-left">
+                  <p className="text-sm text-muted-foreground">
+                    Quick actions:
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    {/* <li className="flex items-center space-x-2 justify-between">
+                      <span>✨ Create a New Form</span>
+                      <span className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                        <kbd>Ctrl+Alt+F</kbd>
+                      </span>
+                    </li> */}
+                    <li className="flex items-center space-x-2 justify-between">
+                      <span>📂 Create a New Collection</span>
+                      <span className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                        <kbd>Ctrl+Alt+C</kbd>
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="text-xs text-muted-foreground flex items-center justify-center space-x-2 pt-4">
+                  <Keyboard className="h-4 w-4" />
+                  <span>
+                    Press{" "}
+                    <kbd className="px-1 py-0.5 bg-muted rounded text-xs font-semibold">
+                      Ctrl+J
+                    </kbd>{" "}
+                    for AI assistant
+                  </span>
+                </div>
+              </div>
             </div>
           )}
         </div>
