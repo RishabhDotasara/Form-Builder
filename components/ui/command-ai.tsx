@@ -28,17 +28,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getForm } from "@/lib/ai";
-import { Form } from "@/types/types";
+import { Form, Question } from "@/types/types";
 import { useToast } from "@/hooks/use-toast";
 
 export function CommandDialogMenu({
   setActiveForm,
   activeForm,
   updateForm,
+  activeQuestions
 }: {
   setActiveForm: React.Dispatch<React.SetStateAction<Form | null>>;
   activeForm: Form | null;
   updateForm: any;
+  activeQuestions:Question[]
 }) {
   const [open, setOpen] = React.useState(false);
   const [aiInputVisible, setAiInputVisible] = React.useState(false);
@@ -76,12 +78,12 @@ export function CommandDialogMenu({
         });
       } else {
         setIsLoadingAnswer(true);
-        const res = await getForm(aiPrompt, activeForm.questions);
+        const res = await getForm(aiPrompt, activeQuestions);
         const json = JSON.parse(res as string);
         console.log(json)
         setActiveForm({
           ...activeForm,
-          questions: [...json.questions],
+          questions: [...activeQuestions, ...json.questions],
         });
         setAiPrompt("");
         setAiInputVisible(false);
@@ -132,8 +134,8 @@ export function CommandDialogMenu({
           <form onSubmit={handleAiSubmit} className="flex flex-col">
             <div className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center space-x-2">
-                <BrainCircuit className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-medium">Ask AI</h2>
+                <Search className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-medium">FormAI</h2>
               </div>
               <Button
                 type="button"

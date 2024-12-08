@@ -19,9 +19,8 @@ import { User } from "firebase/auth";
 
 async function addDocument(collectionName: string, data: any, docId?: string) {
   try {
-    const docRef = docId
-      ? await addDoc(collection(db, collectionName, docId), data)
-      : await addDoc(collection(db, collectionName), data);
+    const pathParts = collectionName.split("/")
+    const docRef = await addDoc(collection(db, collectionName), data);
     console.log("Document written with ID: ", docRef.id);
     return docRef.id;
   } catch (e) {

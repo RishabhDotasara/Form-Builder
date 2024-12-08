@@ -191,6 +191,7 @@ export default function Home() {
       const res = await updateDocument("forms", activeForm?.id as string, {
         ...activeForm,
         questions: questions,
+        lastUpdatedBy: user?.displayName || "",
       });
       setIsUpdatingForm(false);
       toast({
@@ -279,6 +280,7 @@ export default function Home() {
                     setActiveForm={setActiveForm}
                     activeForm={activeForm}
                     updateForm={updateForm}
+                    activeQuestions={questions}
                   />
                   {/* <ModeToggle/> */}
                   {activeForm && (
@@ -313,10 +315,13 @@ export default function Home() {
           {activeForm && (
             <main className="p-6">
               <div className="max-w-4xl mx-auto">
-                <div className="flex justify-between">
-                  <h2 className="text-3xl font-bold mb-6 text-purple-600">
+                <div className="flex justify-between mb-6">
+                  <div>
+                  <h2 className="text-3xl font-bold text-purple-600">
                     {activeForm?.name}
                   </h2>
+                  <span className="text-xs text-muted-foreground">Last Updated By: {activeForm.lastUpdatedBy}</span>
+                  </div>
                   {/* <QuestionTypeSelector /> */}
                   <Button
                     onClick={() => {

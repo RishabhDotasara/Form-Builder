@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getFormByFormId, updateDocument } from "@/lib/firestore-utils";
 import { Form, Question } from "@/types/types";
 import { Loader2 } from "lucide-react";
-import { User } from "firebase/auth";
+import { onAuthStateChanged, signInWithPopup, User } from "firebase/auth";
 import { log } from "@/lib/utils";
 import { Large } from "@/components/ui/large";
 import { useForm } from "react-hook-form";
@@ -30,6 +30,8 @@ import {
   FormMessage,
   Form as UserForm,
 } from "@/components/ui/form";
+import { auth, provider } from "@/lib/firebase";
+import { ToastAction } from "@/components/ui/toast";
 
 export default function SharedFormPage() {
   const params = useParams();
@@ -41,7 +43,7 @@ export default function SharedFormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formSchema, setFormSchema] = useState<z.ZodObject<any> | null>(null);
-  
+  const [user, setUser] = useState<User | null>(null);
 
   const getUserFacingForm = async (id: string) => {
     try {
@@ -94,11 +96,57 @@ export default function SharedFormPage() {
     mode: "onChange",
   });
 
-  // useEffect(() => {
-  //   console.log(formResponses);
-  // }, [formResponses]);
+  //to check if user is looged in or not
+  const handlePopupLogin = async ()=>{
+    try 
+    {
+        await signInWithPopup(auth, provider)
+        toast({
+          title:"Login Successful",
+          description:"You are now Logged In",
+        })
+    }
+    catch(err)
+    {
+      console.log(err)
+      toast({
+        title:"Error Logging In",
+        description:"Please Try Again",
+        variant:"destructive"
+      })
+    }
+  }
+
+  useEffect(()=>{
+    onAuthStateChanged(auth, (user: User | null) => {
+      if (user) {
+        log(user);
+        setUser(user);
+      }
+      else 
+      {
+        toast({
+          title:"You are not Logged In",
+          description:"Please Login to fill the form",
+          action:<ToastAction altText="Login/SignUp" onClick={handlePopupLogin}>Login</ToastAction>
+        })
+      }
+    }
+    );
+  },[])
+
+
 
   const handleSubmit = async (values:  any) => {
+    if(!user)
+    {
+      toast({
+        title:"You are not Logged In",
+        description:"Please Login to submit the form.",
+        action:<ToastAction altText="Login/SignUp" onClick={handlePopupLogin}>Login</ToastAction>
+      })
+      return
+    }
     console.log(values)
     try {
       setIsSubmitting(true);

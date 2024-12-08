@@ -17,6 +17,7 @@ import { addDocument, updateDocument } from "@/lib/firestore-utils";
 import { Loader, Loader2 } from "lucide-react";
 import { Form } from "@/types/types";
 import { useRouter } from "next/navigation";
+import { auth } from "@/lib/firebase";
 
 export function AddFormDialog({
   openDialog,
@@ -38,6 +39,7 @@ export function AddFormDialog({
   const [IsSaving, setIsSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null)
   const router = useRouter()
+  const user = auth.currentUser
 
   useEffect(() => {
     localStorage.getItem("user") ? setUserId(JSON.parse(localStorage.getItem("user") || "").uid) : router.push("/signin");
@@ -65,7 +67,8 @@ export function AddFormDialog({
         userId: userId || "",
         questions: [],
         responses: [],
-        collaborators:[]
+        collaborators:[],
+        lastUpdatedBy:user?.displayName || "",
       };
 
       //this is what goes to forms field in category data

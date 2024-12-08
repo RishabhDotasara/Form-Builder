@@ -5,7 +5,7 @@ export const getSystemPrompt = (jsonSchema, context)=>{
 
  - Generate at least three contextually relevant questions based on the provided prompt. Use the collection of previous questions: ${JSON.stringify(context, null, 2)}. 
 
- - The allowed "type" field options are ["text", "multipleChoice", "checkbox", "imageUpload"], and you must strictly follow these type names.
+ - The allowed "type" field options are ["text", "multipleChoice", "imageUpload"], and you must strictly follow these type names.
 
  - The output must adhere to the schema: ${jsonSchema}.`
 

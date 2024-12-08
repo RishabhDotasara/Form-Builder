@@ -325,8 +325,8 @@ export default function SideBar({
                         onClick={() => {
                           getFormById(form.formId);
                         }}
-                        variant={"outline"}
-                        // className=" hover:bg-purple-50  text-muted-foreground hover:text-primary"
+                        // variant={"outline"}
+                        className=" hover:bg-purple-50  text-muted-foreground hover:text-primary"
                       >
                         <P className="py-2 flex items-center gap-2">
                         <File className="h-4 w-4 "/>

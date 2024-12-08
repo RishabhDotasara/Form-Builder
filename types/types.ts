@@ -33,6 +33,7 @@ export type Form = {
   questions: Array<any>; // Array of questions, can specify type if known
   formId: string; // Custom form identifier
   responses:FormResponse[],
+  lastUpdatedBy:string,
   collaborators:Collaborator[]
 };
 

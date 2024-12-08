@@ -22,12 +22,12 @@ export function FormQuestion({ question,form ,  ...rest}: FormQuestionProps) {
       {(keywords.text.includes(question.type)) && (
         <UserFacingTextType question={question} {...rest}/>
       )}
-      {keywords.checkbox.includes(question.type) && (
+      {/* {keywords.checkbox.includes(question.type) && (
         <UserFacingCheckBoxType  question={question} {...rest} form={form}/>
-      )}
-      {/* {keywords.multipleChoice.includes(question.type) && (
-        <UserFacingMultipleType  question={question} {...rest} />
       )} */}
+      {keywords.multipleChoice.includes(question.type) && (
+        <UserFacingMultipleType  question={question} {...rest} />
+      )}
       {keywords.imageUpload.includes(question.type) && (
         <UserFacingImageType question={question} {...rest}/>
       )}
