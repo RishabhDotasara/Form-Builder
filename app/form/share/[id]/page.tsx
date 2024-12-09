@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { FormQuestion } from "@/components/custom/form-shared";
+import { FormQuestion } from "@/components/custom/user-facing/form-shared";
 import { useToast } from "@/hooks/use-toast";
 import { getFormByFormId, updateDocument } from "@/lib/firestore-utils";
 import { Form, Question } from "@/types/types";
@@ -43,7 +43,14 @@ export default function SharedFormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formSchema, setFormSchema] = useState<z.ZodObject<any> | null>(null);
+  const [defaultFormValues, setDefaultFormValues] =
+    useState<Record<string, any>>();
   const [user, setUser] = useState<User | null>(null);
+  const formForUser = useForm({
+    resolver: formSchema ? zodResolver(formSchema) : undefined,
+    defaultValues: defaultFormValues,
+    mode: "onChange",
+  });
 
   const getUserFacingForm = async (id: string) => {
     try {
@@ -80,78 +87,77 @@ export default function SharedFormPage() {
     });
 
     const generatedSchema = z.object(internalSchema);
+    const defaultValues = {};
+    form?.questions.forEach((question: Question) => {
+      defaultValues[question.id] = "";
+    });
+
     setFormSchema(generatedSchema);
+    setDefaultFormValues(defaultValues);
   }, [form]);
 
-  // Initialize useForm with the dynamically created schema
-  const formForUser = useForm({
-    resolver: formSchema ? zodResolver(formSchema) : undefined,
-    defaultValues: form?.questions.reduce(
-      (acc, question) => ({
-        ...acc,
-        [question.id]: "",
-      }),
-      {}
-    ),
-    mode: "onChange",
-  });
+  //here there is race condition between the hook and the defaultValues, so we need to reset the form values
+  useEffect(() => {
+    if (defaultFormValues) {
+      formForUser.reset(defaultFormValues); // Reset the form values
+    }
+  }, [defaultFormValues, formForUser]);
 
   //to check if user is looged in or not
-  const handlePopupLogin = async ()=>{
-    try 
-    {
-        await signInWithPopup(auth, provider)
-        toast({
-          title:"Login Successful",
-          description:"You are now Logged In",
-        })
-    }
-    catch(err)
-    {
-      console.log(err)
+  const handlePopupLogin = async () => {
+    try {
+      await signInWithPopup(auth, provider);
       toast({
-        title:"Error Logging In",
-        description:"Please Try Again",
-        variant:"destructive"
-      })
+        title: "Login Successful",
+        description: "You are now Logged In",
+      });
+    } catch (err) {
+      console.log(err);
+      toast({
+        title: "Error Logging In",
+        description: "Please Try Again",
+        variant: "destructive",
+      });
     }
-  }
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
     onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
         log(user);
         setUser(user);
-      }
-      else 
-      {
+      } else {
         toast({
-          title:"You are not Logged In",
-          description:"Please Login to fill the form",
-          action:<ToastAction altText="Login/SignUp" onClick={handlePopupLogin}>Login</ToastAction>
-        })
+          title: "You are not Logged In",
+          description: "Please Login to fill the form",
+          action: (
+            <ToastAction altText="Login/SignUp" onClick={handlePopupLogin}>
+              Login
+            </ToastAction>
+          ),
+        });
       }
-    }
-    );
-  },[])
+    });
+  }, []);
 
-
-
-  const handleSubmit = async (values:  any) => {
-    if(!user)
-    {
+  const handleSubmit = async (values: any) => {
+    if (!user) {
       toast({
-        title:"You are not Logged In",
-        description:"Please Login to submit the form.",
-        action:<ToastAction altText="Login/SignUp" onClick={handlePopupLogin}>Login</ToastAction>
-      })
-      return
+        title: "You are not Logged In",
+        description: "Please Login to submit the form.",
+        action: (
+          <ToastAction altText="Login/SignUp" onClick={handlePopupLogin}>
+            Login
+          </ToastAction>
+        ),
+      });
+      return;
     }
-    console.log(values)
+    console.log(values);
     try {
       setIsSubmitting(true);
       const user = JSON.parse(localStorage.getItem("user") as string) || "";
-      console.log(values)
+      console.log(values);
       const res = await updateDocument("forms", form?.id as string, {
         ...form,
         responses: [
@@ -190,7 +196,7 @@ export default function SharedFormPage() {
   } else {
     return (
       <>
-        {!formSubmitted && formForUser && (
+        {!formSubmitted && formForUser && form.isOpen && (
           <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
             <Card className="max-w-2xl mx-auto">
               <CardHeader>
@@ -225,7 +231,11 @@ export default function SharedFormPage() {
                                 )}
                               </FormLabel>
                               <FormControl>
-                                <FormQuestion question={question} form={formForUser} {...field}/>
+                                <FormQuestion
+                                  question={question}
+                                  form={formForUser}
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -259,6 +269,21 @@ export default function SharedFormPage() {
                 </CardTitle>
                 <CardDescription className="text-center">
                   Thank you for your response!
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        )}
+
+        {!form.isOpen && (
+          <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+            <Card className="max-w-2xl mx-auto">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-center">
+                  {form?.name}
+                </CardTitle>
+                <CardDescription className="text-center">
+                  This form is currently closed and not accepting responses.
                 </CardDescription>
               </CardHeader>
             </Card>

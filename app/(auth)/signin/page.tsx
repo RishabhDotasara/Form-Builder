@@ -1,4 +1,4 @@
-import LoginPage from '@/components/custom/signin'
+import LoginPage from '@/components/custom/signin/signin'
 import React from 'react'
 
 export default function SignUp() {

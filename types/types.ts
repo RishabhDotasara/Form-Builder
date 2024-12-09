@@ -34,7 +34,8 @@ export type Form = {
   formId: string; // Custom form identifier
   responses:FormResponse[],
   lastUpdatedBy:string,
-  collaborators:Collaborator[]
+  collaborators:Collaborator[],
+  isOpen:boolean
 };
 
 export type sharedForms = {formId:string, formName:string}

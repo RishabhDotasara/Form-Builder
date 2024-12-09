@@ -65,7 +65,7 @@ export function AddCollectionDialog({
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && (e.ctrlKey) &&  e.key ===  "c") {
+      if ((e.metaKey || e.ctrlKey) && (e.altKey) &&  e.key ===  "c") {
         e.preventDefault();
         setOpen((visible) => !visible);
         if (!open) {

@@ -28,7 +28,7 @@ import { Collaborator, Form } from "@/types/types";
 import { collection, doc, runTransaction } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DeleteConfirmationDialog } from "../delete-confirmation";
+import { DeleteConfirmationDialog } from "../utility/delete-confirmation";
 
 export function AddCollaboratorsDialog({
   trigger,

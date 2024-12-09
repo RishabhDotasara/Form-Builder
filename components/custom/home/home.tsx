@@ -54,10 +54,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import SideBar from "@/components/custom/sidebar";
+
 import { CommandDialogMenu } from "@/components/ui/command-ai";
 import { auth } from "@/lib/firebase";
-import QuestionBlock from "./questions/question";
+
 import {
   Collaborator,
   Form,
@@ -72,19 +72,24 @@ import {
   getDocumentsForUser,
   updateDocument,
 } from "@/lib/firestore-utils";
-import { LoadingSkeleton } from "./sidear-loading-skeleton";
+
 import { QuerySnapshot } from "firebase/firestore";
-import { Large } from "../ui/large";
-import { ShareDialog } from "./share-form";
-import { Groq } from "groq-sdk";
-import { ScrollArea } from "../ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Badge } from "../ui/badge";
-import { ResponsesTab } from "./responses-tab";
+
+
+
+
 import { useRouter } from "next/navigation";
-import { ModeToggle } from "./mode-toggle";
-import { AddCollaboratorsDialog } from "./collaborators/collaborators-dialog";
+
 import { User } from "firebase/auth";
+import QuestionBlock from "../questions/question";
+import SideBar from "../sidebar/sidebar";
+import { ShareDialog } from "./share-form";
+import { AddCollaboratorsDialog } from "../collaborators/collaborators-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ResponsesTab } from "./responses-tab";
+import FormInterface from "./form-interface";
 
 export default function Home() {
   //categories is collections
@@ -212,52 +217,9 @@ export default function Home() {
     setQuestions(questions.filter((q) => q.id !== id));
   };
 
-  const renderQuestionBlock = (question: Question) => {
-    const isEditing = editingQuestionId === question.id;
 
-    return (
-      <QuestionBlock
-        question={question}
-        editingQuestionId={editingQuestionId as string}
-        deleteQuestion={deleteQuestion}
-        setEditingQuestionId={setEditingQuestionId}
-        updateQuestion={updateQuestion}
-        updateForm={updateForm}
-        key={question.id}
-      />
-    );
-  };
 
-  const QuestionTypeSelector = () => {
-    return (
-      <Select onValueChange={(value: QuestionType) => addQuestion(value)}>
-        <SelectTrigger className="w-fit">
-          <PlusCircle className="h-4 w-4 font-light mr-2" />
-          <SelectValue placeholder="Add" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="text">
-            <div className="flex items-center">
-              <AlignLeft className="mr-2 h-4 w-4" />
-              Text Question
-            </div>
-          </SelectItem>
-          <SelectItem value="multipleChoice">
-            <div className="flex items-center">
-              <List className="mr-2 h-4 w-4" />
-              Multiple Choice
-            </div>
-          </SelectItem>
-          <SelectItem value="imageUpload">
-            <div className="flex items-center">
-              <ImageIcon className="mr-2 h-4 w-4" />
-              Image Upload
-            </div>
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    );
-  };
+
 
   return (
     <div className="h-screen w-full bg-white relative flex overflow-hidden">
@@ -313,58 +275,17 @@ export default function Home() {
           </header>
 
           {activeForm && (
-            <main className="p-6">
-              <div className="max-w-4xl mx-auto">
-                <div className="flex justify-between mb-6">
-                  <div>
-                  <h2 className="text-3xl font-bold text-purple-600">
-                    {activeForm?.name}
-                  </h2>
-                  <span className="text-xs text-muted-foreground">Last Updated By: {activeForm.lastUpdatedBy}</span>
-                  </div>
-                  {/* <QuestionTypeSelector /> */}
-                  <Button
-                    onClick={() => {
-                      updateForm();
-                    }}
-                    disabled={isUpdatingForm}
-                    className="sticky top-8 right-8"
-                  >
-                    {isUpdatingForm && <Loader2 className="animate-spin" />}{" "}
-                    {!isUpdatingForm && <Save />}Save
-                  </Button>
-                </div>
-                <Tabs
-                  value={activeTab}
-                  onValueChange={setActiveTab}
-                  className="w-full"
-                >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="editor">Form Editor</TabsTrigger>
-                    <TabsTrigger value="responses">
-                      Responses{" "}
-                      <Badge className="ml-2">
-                        {activeForm.responses.length}
-                      </Badge>
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="editor" className="mt-6">
-                    <ScrollArea>
-                      {questions && questions.map(renderQuestionBlock)}
-                    </ScrollArea>
-                    <div className="mt-4 w-full flex justify-center">
-                      <QuestionTypeSelector />
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="responses" className="mt-6">
-                    <ResponsesTab
-                      responses={activeForm.responses}
-                      questions={questions}
-                    />
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </main>
+            <FormInterface
+              activeForm={activeForm}
+              questions={questions}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              updateForm={updateForm}
+              isUpdatingForm={isUpdatingForm}
+              deleteQuestion={deleteQuestion}
+              updateQuestion={updateQuestion}
+              addQuestion={addQuestion}
+            />
           )}
           {!activeForm && (
             <div className="flex flex-col items-center justify-center  h-5/6 bg-background text-foreground p-8">

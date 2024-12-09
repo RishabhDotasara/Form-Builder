@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 type Body = {
     userId:string,
     formName:string,
+    userName:string
 }
 
 export async function POST(req: NextRequest) {
@@ -24,7 +25,9 @@ export async function POST(req: NextRequest) {
       userId: body.userId || "",
       questions: [],
       responses: [],
+      lastUpdatedBy:body.userName,
       collaborators: [],
+      isOpen:true
     };
     await addDocument("forms", formData);
     await addDocument("sharedDocuments", {formId:id, userId:body.userId, formName:body.formName})

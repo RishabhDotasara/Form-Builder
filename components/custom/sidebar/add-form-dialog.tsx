@@ -69,6 +69,7 @@ export function AddFormDialog({
         responses: [],
         collaborators:[],
         lastUpdatedBy:user?.displayName || "",
+        isOpen:true
       };
 
       //this is what goes to forms field in category data

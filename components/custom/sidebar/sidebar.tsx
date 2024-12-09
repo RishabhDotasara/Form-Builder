@@ -1,20 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-} from "../ui/sidebar";
+
 import { motion } from "framer-motion";
-import { Button } from "../ui/button";
+
 import {
   Boxes,
   ChevronDown,
@@ -27,26 +14,13 @@ import {
   Plus,
   Trash2Icon,
 } from "lucide-react";
-import { TextGenerateEffect } from "../ui/text-generate-effect";
-import { H4 } from "../ui/h4";
-import { H3 } from "../ui/h3";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../ui/collapsible";
-import { Small } from "../ui/small";
-import { Large } from "../ui/large";
-import { P } from "../ui/p";
-import { ScrollArea } from "../ui/scroll-area";
-import UserMenu from "./user-menu";
+
+
 import { useRecoilValue } from "recoil";
 import userAtom from "@/atoms/userAtom";
 import { User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { AddFormDialog } from "./add-form-dialog";
-import { AddCollectionDialog } from "./add-collection-dialog";
-import { Skeleton } from "../ui/skeleton";
+
 import { log } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -57,7 +31,19 @@ import {
   updateDocument,
 } from "@/lib/firestore-utils";
 import { Category, Form, sharedForms } from "@/types/types";
-import { DeleteConfirmationDialog } from "./delete-confirmation";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem } from "@/components/ui/sidebar";
+import { AddFormDialog } from "./add-form-dialog";
+import { AddCollectionDialog } from "./add-collection-dialog";
+import { H3 } from "@/components/ui/h3";
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Large } from "@/components/ui/large";
+import { P } from "@/components/ui/p";
+import { DeleteConfirmationDialog } from "../utility/delete-confirmation";
+import { Button } from "@/components/ui/button";
+import UserMenu from "./user-menu";
 
 export default function SideBar({
   categories,
@@ -235,7 +221,7 @@ export default function SideBar({
                                         <File className="h-4 w-4 "/>
                                         {form.formName.length < 10
                                           ? form.formName
-                                          : form.formName.substring(0, 13) +
+                                          : form.formName.substring(0, 8) +
                                             "..."}
                                       </P>
                                     </SidebarMenuButton>

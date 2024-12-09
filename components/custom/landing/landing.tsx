@@ -5,11 +5,13 @@ import { Input } from "@/components/ui/input"
 import { BarChart3, FileText, Bot, ArrowRight, Sparkles, LineChart } from 'lucide-react'
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { useRouter } from "next/navigation"
 
-export default function LandingPage() {
+export default function LandingComponent() {
+  const router = useRouter()
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 h-14 flex items-center">
+    <div className="flex flex-col min-h-screen items-center">
+      <header className="px-4 lg:px-6 h-14 flex items-center w-full">
         <Link className="flex items-center justify-center" href="#">
           <FileText className="h-6 w-6 text-purple-600" />
           <span className="ml-2 text-2xl font-bold">FormAI</span>
@@ -26,7 +28,7 @@ export default function LandingPage() {
           </Link>
         </nav>
       </header>
-      <main className="flex-1">
+      <main className="flex-1 max-w-7xl">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
           <div className="container px-4 md:px-6">
             <motion.div 
@@ -45,7 +47,7 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="space-x-4">
-                <Button className="bg-purple-600 hover:bg-purple-700">
+                <Button className="bg-purple-600 hover:bg-purple-700" onClick={()=>{router.push("/signin")}}>
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -92,45 +94,7 @@ export default function LandingPage() {
             </motion.div>
           </div>
         </section>
-        <section className="w-full py-12 md:py-24 lg:py-32">
-          <div className="container px-4 md:px-6">
-            <motion.div 
-              className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
-                  <div className="inline-block rounded-lg bg-purple-100 px-3 py-1 text-sm dark:bg-purple-900">
-                    Analytics
-                  </div>
-                  <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                    Understand Your Data Better
-                  </h2>
-                  <p className="max-w-[600px] text-gray-500 md:text-xl dark:text-gray-400">
-                    Get powerful insights with our AI-powered analytics. Track responses, measure engagement, and optimize your forms in real-time.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button className="bg-purple-600 hover:bg-purple-700">
-                    Try Analytics
-                    <LineChart className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button variant="outline">Learn More</Button>
-                </div>
-              </div>
-              <div className="mx-auto aspect-video overflow-hidden rounded-xl border bg-white p-4 shadow-xl dark:bg-gray-900">
-                <div className="h-full w-full bg-gray-100 rounded-lg dark:bg-gray-800">
-                  {/* Placeholder for analytics dashboard preview */}
-                  <div className="h-full w-full flex items-center justify-center">
-                    <BarChart3 className="h-24 w-24 text-purple-600 opacity-50" />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+ 
         <section className="w-full py-12 md:py-24 lg:py-32 border-t">
           <div className="container px-4 md:px-6">
             <motion.div 

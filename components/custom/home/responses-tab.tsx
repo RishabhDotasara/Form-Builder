@@ -15,7 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import * as XLSX from "xlsx";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Large } from "../ui/large";
+import { Large } from "@/components/ui/large";
+
 
 export function ResponsesTab({ responses, questions }: { responses: any[], questions: any[] }) {
   const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
