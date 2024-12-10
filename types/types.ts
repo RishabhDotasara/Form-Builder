@@ -47,6 +47,11 @@ export type Category = {
   userId:string
 }
 
+export type DBUser = {
+  email:string,
+  displayName:string,
+  photoURL:string,
+}
 //expected types from the ai for input type
 export const keywords = {
   "text":["text", "textarea"],

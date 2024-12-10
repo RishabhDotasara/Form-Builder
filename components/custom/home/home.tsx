@@ -21,6 +21,7 @@ import {
   Loader2,
   Save,
   Keyboard,
+  Code,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -75,9 +76,6 @@ import {
 
 import { QuerySnapshot } from "firebase/firestore";
 
-
-
-
 import { useRouter } from "next/navigation";
 
 import { User } from "firebase/auth";
@@ -90,6 +88,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResponsesTab } from "./responses-tab";
 import FormInterface from "./form-interface";
+import EmbedDialog from "../embedding-forms/embed-dialog";
 
 export default function Home() {
   //categories is collections
@@ -217,10 +216,6 @@ export default function Home() {
     setQuestions(questions.filter((q) => q.id !== id));
   };
 
-
-
-
-
   return (
     <div className="h-screen w-full bg-white relative flex overflow-hidden">
       <SidebarProvider>
@@ -247,25 +242,27 @@ export default function Home() {
                   {/* <ModeToggle/> */}
                   {activeForm && (
                     <div className="flex gap-4">
-                      <ShareDialog
-                        formId={activeForm.formId}
-                        trigger={
-                          <Button variant={"outline"}>
-                            <Share2Icon />
-                          </Button>
-                        }
-                      />
+                      
+                      <EmbedDialog />
 
                       {user && activeForm.userId == user.uid && (
                         <AddCollaboratorsDialog
                           activeForm={activeForm}
                           trigger={
-                            <Button variant={"default"}>
+                            <Button variant={"outline"}>
                               <UserPlus />
                             </Button>
                           }
                         />
                       )}
+                      <ShareDialog
+                        formId={activeForm.formId}
+                        trigger={
+                          <Button variant={"default"}>
+                            <Share2Icon />
+                          </Button>
+                        }
+                      />
                     </div>
                   )}
                 </div>

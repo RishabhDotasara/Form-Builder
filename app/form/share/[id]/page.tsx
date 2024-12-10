@@ -43,12 +43,10 @@ export default function SharedFormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formSchema, setFormSchema] = useState<z.ZodObject<any> | null>(null);
-  const [defaultFormValues, setDefaultFormValues] =
-    useState<Record<string, any>>();
   const [user, setUser] = useState<User | null>(null);
   const formForUser = useForm({
     resolver: formSchema ? zodResolver(formSchema) : undefined,
-    defaultValues: defaultFormValues,
+    defaultValues: {},
     mode: "onChange",
   });
 
@@ -93,15 +91,8 @@ export default function SharedFormPage() {
     });
 
     setFormSchema(generatedSchema);
-    setDefaultFormValues(defaultValues);
+    formForUser.reset(defaultValues);
   }, [form]);
-
-  //here there is race condition between the hook and the defaultValues, so we need to reset the form values
-  useEffect(() => {
-    if (defaultFormValues) {
-      formForUser.reset(defaultFormValues); // Reset the form values
-    }
-  }, [defaultFormValues, formForUser]);
 
   //to check if user is looged in or not
   const handlePopupLogin = async () => {
@@ -185,7 +176,7 @@ export default function SharedFormPage() {
         variant: "destructive",
       });
     }
-  };
+  };  
 
   if (IsLoadingForm || !form) {
     return (
@@ -220,7 +211,7 @@ export default function SharedFormPage() {
                       return (
                         <FormField
                           control={formForUser.control}
-                          name={question.id}
+                          name={question.id as never}
                           key={question.id}
                           render={({ field }) => (
                             <FormItem>

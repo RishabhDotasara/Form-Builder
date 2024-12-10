@@ -218,7 +218,7 @@ async function getDocumentById(collectionName: string, docId: string) {
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      console.log("Document data:", docSnap.data());
+      // console.log("Document data:", docSnap.data());
       return { id: docSnap.id, ...docSnap.data() };
     } else {
       console.log("No such document!");
