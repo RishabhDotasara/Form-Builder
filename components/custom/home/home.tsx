@@ -22,6 +22,8 @@ import {
   Save,
   Keyboard,
   Code,
+  CodeSquare,
+  Code2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -168,6 +170,7 @@ export default function Home() {
     const newQuestion: Question = {
       id: Date.now().toString(),
       type,
+      // default:type == "imageUpload" ? "":"Not Answered!",
       question: "New Question",
       options:
         type === "multipleChoice" || type === "checkbox"
@@ -242,8 +245,7 @@ export default function Home() {
                   {/* <ModeToggle/> */}
                   {activeForm && (
                     <div className="flex gap-4">
-                      
-                      <EmbedDialog />
+                      <EmbedDialog formId={activeForm.id} trigger={<Button variant={"outline"}><Code2/></Button>} />
 
                       {user && activeForm.userId == user.uid && (
                         <AddCollaboratorsDialog

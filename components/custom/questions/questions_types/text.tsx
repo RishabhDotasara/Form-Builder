@@ -5,7 +5,7 @@ export default function TextType({isEditing}:{isEditing:Boolean}) {
   return (
     <Textarea
       placeholder="Enter your answer"
-      disabled={!isEditing}
+      disabled={true}
       className="w-full mt-2"
     />
   );

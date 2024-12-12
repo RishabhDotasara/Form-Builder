@@ -6,9 +6,20 @@ import { BarChart3, FileText, Bot, ArrowRight, Sparkles, LineChart } from 'lucid
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import { onAuthStateChanged } from "firebase/auth"
+import { auth } from "@/lib/firebase"
 
 export default function LandingComponent() {
   const router = useRouter()
+  useEffect(()=>{
+    onAuthStateChanged(auth, (user)=>{
+      if (user)
+      {
+        router.push("/home")
+      }
+    })
+  },[])
   return (
     <div className="flex flex-col min-h-screen items-center">
       <header className="px-4 lg:px-6 h-14 flex items-center w-full">

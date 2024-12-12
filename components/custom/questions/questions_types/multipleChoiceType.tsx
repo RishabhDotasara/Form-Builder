@@ -22,7 +22,7 @@ export default function MultipleChoiceType({
           <RadioGroupItem
             value={option}
             id={`${questionId}-${index}`}
-            disabled={!isEditing}
+            disabled={true}
           />
           {isEditing ? (
             <Input

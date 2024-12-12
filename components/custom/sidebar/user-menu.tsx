@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {  Settings, HelpCircle, LogOut, ChevronUp, UserIcon } from 'lucide-react'
+import {  Settings, HelpCircle, LogOut, ChevronUp, UserIcon, File } from 'lucide-react'
 import { handleLogout } from '@/lib/auth-utils'
 import { useToast } from '@/hooks/use-toast'
 import { auth } from '@/lib/firebase'
@@ -89,6 +89,10 @@ export default function UserMenu() {
             <span>Help</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator /> */}
+          <DropdownMenuItem onClick={()=>{router.push("/docs/embedding")}}>
+            <File className="mr-2 h-4 w-4" />
+            Embedding Docs
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleuserLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>

@@ -41,7 +41,7 @@ export default function QuestionBlock({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="mb-4 p-4 bg-white rounded-lg shadow w-full"
+      className="mb-4 p-4 bg-white rounded-lg border border-gray-200 w-full"
     >
       {/* Question heading part */}
       <div className="flex justify-between items-center mb-2">
@@ -76,7 +76,7 @@ export default function QuestionBlock({
             </Select>
           </div>
         ) : (
-          <h3 className="font-bold text-lg">
+          <h3 className="font-semibold text-lg">
             {question?.question}
             {question?.required && <span className="text-red-500 ml-2">*</span>}
           </h3>

@@ -14,6 +14,7 @@ export interface Question {
   question: string;
   options?: string[];
   required?: boolean;
+  // default:string
 }
 
 type FormResponse = {
