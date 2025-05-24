@@ -7,7 +7,9 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
   onSnapshot,
+  orderBy,
   query,
   setDoc,
   updateDoc,
@@ -29,26 +31,42 @@ async function addDocument(collectionName: string, data: any, docId?: string) {
   }
 }
 
-function getAllDocuments(collectionName: string, callback: Function) {
+async function getAllDocuments(collectionName: string, limitCount?: number, fieldName?: string, fieldValue?: any) {
   try {
-    const unsubscribe = onSnapshot(
+   
+    let q;
+    if (fieldName && fieldValue !== undefined) {
+      // Use Firestore's >= and <= for basic text search (prefix match)
+      const endValue = fieldValue + '\uf8ff';
+      q = query(
       collection(db, collectionName),
-      (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        callback(data);
-      }
-    );
-    return unsubscribe; // Unsubscribe function
+      where(fieldName, ">=", fieldValue),
+      where(fieldName, "<=", endValue),
+      limit(limitCount ? limitCount : 5),
+      orderBy('createdAt', 'desc')
+      );
+    } else {
+      q = query(
+      collection(db, collectionName),
+      limit(limitCount ? limitCount : 5),
+      orderBy('createdAt', 'desc')
+      );
+    }
+
+    const querySnapshot = await getDocs(q);
+    const data = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      // @ts-ignore 
+      ...doc.data(),
+    }));
+    return data;
   } catch (e) {
-    console.error("Error listening to documents: ", e);
+    console.error("Error fetching documents: ", e);
     throw e;
   }
 }
 
-function getAllMyDocuments(
+async function getAllMyDocuments(
   collectionName: string,
   userId: string,
   callback: Function
@@ -58,16 +76,15 @@ function getAllMyDocuments(
       collection(db, collectionName),
       where("userId", "==", userId)
     );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      callback(data);
-    });
-    return unsubscribe; // Unsubscribe function
+    const querySnapshot = await getDocs(q);
+    const data = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    callback(data);
+    return data;
   } catch (e) {
-    console.error("Error listening to documents: ", e);
+    console.error("Error fetching documents: ", e);
     throw e;
   }
 }
@@ -99,7 +116,7 @@ async function deleteDocument(collectionName: string, docId: string) {
   }
 }
 
-function getDocumentsForUser(
+async function getDocumentsForUser(
   collectionName: string,
   userId: string,
   callback: Function
@@ -109,16 +126,15 @@ function getDocumentsForUser(
       collection(db, collectionName),
       where("userId", "==", userId)
     );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      callback(data);
-    });
-    return unsubscribe; // Unsubscribe function
+    const querySnapshot = await getDocs(q);
+    const data = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    callback(data);
+    return;
   } catch (e) {
-    console.error("Error listening to user documents: ", e);
+    console.error("Error fetching user documents: ", e);
     throw e;
   }
 }

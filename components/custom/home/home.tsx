@@ -57,7 +57,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import {useQuery} from "@tanstack/react-query"
 import { CommandDialogMenu } from "@/components/ui/command-ai";
 import { auth } from "@/lib/firebase";
 
@@ -136,31 +136,32 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user") as string) || "";
-    if (!user) {
-      router.push("/signin");
-      return;
-    }
-
-    //get user categories
-    const unsubscribe = getDocumentsForUser(
-      "category",
-      user.uid,
-      (data: any) => {
-        setCategories(data); // Update state with the latest categories
-        console.log(data);
+  const getUserDocumentsQuery = useQuery({
+    queryKey: ["userDocuments"],
+    queryFn: async () => {
+      const user = JSON.parse(localStorage.getItem("user") as string) || "";
+      if (!user) {
+        router.push("/signin");
+        return;
       }
-    );
 
-    //get sharedForms
-    getSharedForms();
+      //get user categories
+      getDocumentsForUser(
+        "category",
+        user.uid,
+        (data: any) => {
+          setCategories(data); // Update state with the latest categories
+          console.log(data);
+        }
+      );
 
-    // Cleanup on component unmount
-    return () => {
-      unsubscribe(); // Stop listening when component is unmounted
-    };
-  }, []); // This effect depends on user.uid
+      //get sharedForms
+      getSharedForms();
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+  })
+
 
   useEffect(() => {
     setQuestions(activeForm?.questions as Question[]);

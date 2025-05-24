@@ -15,12 +15,6 @@ import {
   Trash2Icon,
 } from "lucide-react";
 
-
-import { useRecoilValue } from "recoil";
-import userAtom from "@/atoms/userAtom";
-import { User } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-
 import { log } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -44,6 +38,8 @@ import { P } from "@/components/ui/p";
 import { DeleteConfirmationDialog } from "../utility/delete-confirmation";
 import { Button } from "@/components/ui/button";
 import UserMenu from "./user-menu";
+import { useRouter, useSearchParams } from "next/navigation";
+import {useQueryClient} from "@tanstack/react-query"
 
 export default function SideBar({
   categories,
@@ -63,10 +59,11 @@ export default function SideBar({
   const [toCreateCategoryData, setCategoryData] = useState<any>();
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [isLoadingForm, setIsLoadingForm] = useState(false);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter()
   const [collectionDialogOpen, setCollectionDialogOpen] = useState(false);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   //user states
 
   const addForm = (categoryName: string, formName: string) => {
@@ -79,14 +76,37 @@ export default function SideBar({
     );
   };
 
+  // function to set url search param in form ID
+
+  const setQuery = (key:string, value:string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set(key, value)
+
+    // Push the new URL
+    router.push(`?${params.toString()}`)
+  }
+
+
   //using formId
   const getFormById = async (id: string) => {
     try {
       setIsLoadingForm(true);
       //get form from forms collectuion using the formId field using firestore methods
+      setQuery('formId', id)
       const res = await getFormByFormId(id, (data: Form | null) => {
+        if (!data) {
+          toast({
+          title:"Error Fetching Form",
+          variant:"destructive",
+          description:"Please try again!"
+        })
+        setQuery('formId', '')
+        setActiveForm(null);
+          return;
+        }
         setIsLoadingForm(false);
         setActiveForm(data);
+        return data;
       });
       console.log(res);
       setIsLoadingForm(false);
@@ -117,6 +137,8 @@ export default function SideBar({
         categories?.filter((category: Category) => category.id !== id)
       );
 
+      queryClient.invalidateQueries({queryKey:["userDocuments"]})
+
       toast({
         title: "Collection Deleted",
         description: "Collection and all its forms have been deleted!",
@@ -146,6 +168,7 @@ export default function SideBar({
         ...category,
         forms: category?.forms.filter((form: any) => form.formId !== formId),
       });
+      queryClient.invalidateQueries({queryKey:["userDocuments"]})
     } catch (err) {
       console.log(err);
       toast({
@@ -156,6 +179,17 @@ export default function SideBar({
     }
   };
 
+
+  // useEffect to check if a form was selected by using the URL search params
+  useEffect(()=>{
+    const formId = searchParams.get("formId")
+    if (formId)
+    {
+      getFormById(formId)
+    }
+  },[])
+
+
   return (
     <Sidebar className="bg-background ">
       <AddFormDialog
@@ -164,6 +198,7 @@ export default function SideBar({
         category={toCreateFormCategory}
         TocategoryData={toCreateCategoryData}
         getForm={getFormById}
+        addForm={addForm}
       />
       <AddCollectionDialog
         open={collectionDialogOpen}

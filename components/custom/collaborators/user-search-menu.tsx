@@ -20,6 +20,7 @@ import {
 import { getAllDocuments } from "@/lib/firestore-utils";
 import { User } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
+import {useQuery} from "@tanstack/react-query";
 
 export function UserSearchMenu({
   onSelect,
@@ -30,12 +31,20 @@ export function UserSearchMenu({
   const [value, setValue] = React.useState("");
   const [users, setUsers] = React.useState<User[]>([]);
   const { toast } = useToast();
-  const getUsers = async () => {
+  const getUsersByQuery = async () => {
     try {
-      getAllDocuments("users", (users: any) => {
-        setUsers(users.map((user:any)=>{return {...user, uid:user.id}}));
-        log(users.map((user:any)=>{return {...user, uid:user.id}}))
-      });
+      let users:any;
+      if (value)
+      {
+        users = await getAllDocuments("users", 5, "email", value);
+        console.log(`${value}`, users);
+      }
+      else 
+      {
+        users = await getAllDocuments("users", 5);
+      }
+      setUsers(users.map((user:any)=>{return {...user, uid:user.id}}));
+      log(users.map((user:any)=>{return {...user, uid:user.id}}))
     } catch (err) {
       log(err);
       toast({
@@ -46,9 +55,15 @@ export function UserSearchMenu({
     }
   };
 
-  React.useEffect(()=>{
-    getUsers()
-  },[])
+  const getUserByEmailQuery = useQuery({
+    queryKey: ["users", value],
+    queryFn: getUsersByQuery,
+    enabled: Boolean(value),
+  })
+
+  // React.useEffect(()=>{
+  //   getUsersByQuery()
+  // },[])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -65,8 +80,8 @@ export function UserSearchMenu({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0">
-        <Command>
-          <CommandInput placeholder="Search users..." />
+        <Command >
+          <CommandInput placeholder="Search users by email..." value={value} onValueChange={setValue}/>
           <CommandEmpty>No user found.</CommandEmpty>
           <CommandList>
           <CommandGroup>

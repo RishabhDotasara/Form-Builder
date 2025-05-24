@@ -89,10 +89,6 @@ export default function UserMenu() {
             <span>Help</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator /> */}
-          <DropdownMenuItem onClick={()=>{router.push("/docs/embedding")}}>
-            <File className="mr-2 h-4 w-4" />
-            Embedding Docs
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleuserLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>

@@ -54,6 +54,15 @@ export default function SharedFormPage() {
     try {
       setIsLoadingForm(true);
       await getFormByFormId(id, (data: Form | null) => {
+        if (!data) {
+          // toast({
+          //   title: "Error Loading Form!",
+          //   description: "Please Refresh The Page.",
+          //   variant: "destructive",
+          // });
+          setForm(null);
+          return;
+        }
         log(data);
         setForm(data);
       }); //formId
@@ -178,13 +187,32 @@ export default function SharedFormPage() {
     }
   };  
 
-  if (IsLoadingForm || !form) {
+  if (IsLoadingForm) {
     return (
       <div className="h-screen w-full flex items-center justify-center">
         <Loader2 className="animate-spin h-12 w-12" />
       </div>
     );
-  } else {
+  }
+  else if (!IsLoadingForm && !form)
+  {
+    return (
+      <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+        <Card className="max-w-2xl mx-auto">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center">
+              Form Not Found
+            </CardTitle>
+            <CardDescription className="text-center">
+              The form you are looking for does not exist or has been deleted.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    )
+  }
+  
+  else {
     return (
       <>
         {!formSubmitted && formForUser && form.isOpen && (

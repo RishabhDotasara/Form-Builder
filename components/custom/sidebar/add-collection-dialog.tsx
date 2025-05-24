@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { addDocument } from "@/lib/firestore-utils";
 import { Loader2 } from "lucide-react";
+import {useQueryClient} from "@tanstack/react-query"
 
 export function AddCollectionDialog({
   open,
@@ -26,7 +27,7 @@ export function AddCollectionDialog({
   const { toast } = useToast();
   const [IsCreating, setIsCreating] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
-
+  const queryClient = useQueryClient()
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!collectionName) {
@@ -50,6 +51,9 @@ export function AddCollectionDialog({
         title: `Created ${data.name}`,
         description: "You can start adding forms.",
       });
+
+      // invalidate the documents in sidebar
+      queryClient.invalidateQueries({queryKey:["userDocuments"]})
       setIsCreating(false);
       setOpen(false)
     } catch (err) {

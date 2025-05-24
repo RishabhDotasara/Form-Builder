@@ -207,7 +207,7 @@ export function AddCollaboratorsDialog({
                       </div>
                     </div>
                     <div className="flex items-center">
-                      <select
+                      {/* <select
                         value={collaborator.role}
                         onChange={(e) => {
                           const newRole = e.target.value as "editor" | "viewer";
@@ -223,7 +223,7 @@ export function AddCollaboratorsDialog({
                       >
                         <option value="editor">Editor</option>
                         <option value="viewer">Viewer</option>
-                      </select>
+                      </select> */}
                       <Button
                         variant="ghost"
                         size="sm"

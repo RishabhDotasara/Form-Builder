@@ -18,6 +18,7 @@ import { Loader, Loader2 } from "lucide-react";
 import { Form } from "@/types/types";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
+import {QueryClient, useQueryClient} from "@tanstack/react-query"
 
 export function AddFormDialog({
   openDialog,
@@ -25,13 +26,14 @@ export function AddFormDialog({
   category,
   TocategoryData,
   getForm,
-
+  addForm
 }: {
   openDialog: boolean | undefined;
   setOpen: Dispatch<SetStateAction<boolean>>;
   category: string;
   TocategoryData: any;
   getForm:Function;
+  addForm:Function
 }) {
   const [formName, setFormName] = useState("");
   const { toast } = useToast();
@@ -40,7 +42,7 @@ export function AddFormDialog({
   const inputRef = useRef<HTMLInputElement | null>(null)
   const router = useRouter()
   const user = auth.currentUser
-
+  const queryClient = useQueryClient()
   useEffect(() => {
     localStorage.getItem("user") ? setUserId(JSON.parse(localStorage.getItem("user") || "").uid) : router.push("/signin");
   }, []);
@@ -89,6 +91,10 @@ export function AddFormDialog({
       const res2 = await updateDocument("category", category, newCategoryData);
       // console.log(res);
       await getForm(id)
+      
+      // invalidate the documents to show fresh forms
+      queryClient.invalidateQueries({queryKey:["userDocuments"]})
+
       setIsSaving(false);
       setOpen(false);
     } catch (err) {
