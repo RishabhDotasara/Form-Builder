@@ -215,7 +215,7 @@ export default function SharedFormPage() {
   else {
     return (
       <>
-        {!formSubmitted && formForUser && form.isOpen && (
+        {!formSubmitted && formForUser && form?.isOpen && (
           <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
             <Card className="max-w-2xl mx-auto">
               <CardHeader>
@@ -294,7 +294,7 @@ export default function SharedFormPage() {
           </div>
         )}
 
-        {!form.isOpen && (
+        {!form?.isOpen && (
           <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
             <Card className="max-w-2xl mx-auto">
               <CardHeader>
