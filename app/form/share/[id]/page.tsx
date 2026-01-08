@@ -50,37 +50,22 @@ export default function SharedFormPage() {
     mode: "onChange",
   });
 
-  const getUserFacingForm = async (id: string) => {
-    try {
-      setIsLoadingForm(true);
-      await getFormByFormId(id, (data: Form | null) => {
-        if (!data) {
-          // toast({
-          //   title: "Error Loading Form!",
-          //   description: "Please Refresh The Page.",
-          //   variant: "destructive",
-          // });
-          setForm(null);
-          return;
-        }
-        log(data);
-        setForm(data);
-      }); //formId
-    } catch (err) {
-      console.log(err);
-      toast({
-        title: "Error Loading Form!",
-        description: "Please Refresh The Page.",
-        variant: "destructive",
-      });
-    }
-  };
+
 
   useEffect(() => {
-    getUserFacingForm(formId).then(() => {
+    setIsLoadingForm(true);
+
+    const unsubscribe = getFormByFormId(formId, (data: Form | null) => {
+      if (data) {
+        log(data);
+        console.log("Form Data:", data);
+        setForm(data);
+      }
       setIsLoadingForm(false);
     });
-  }, []);
+
+    return () => unsubscribe();
+  }, [formId]);
 
   // Dynamically generate the schema when the form is ready
   useEffect(() => {
@@ -122,7 +107,7 @@ export default function SharedFormPage() {
   };
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user: User | null) => {
+    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
         log(user);
         setUser(user);
@@ -138,6 +123,10 @@ export default function SharedFormPage() {
         });
       }
     });
+
+    return () => {
+      unsubscribe();
+    }
   }, []);
 
   const handleSubmit = async (values: any) => {

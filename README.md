@@ -11,6 +11,9 @@ This is a **Form Builder** app that allows users to create and manage forms with
 - **Form Submission**: Allows users to submit responses to the forms created, with real-time data synchronization.
 - **Export to Excel**: Export form responses to Excel files using SheetJS.
 
+## TODO
+- we have to restrict the user from updating the form once there are responses as it will cause errors afterwards in excel generation or make excel generation pipeline more flexible.
+
 ## Technologies Used
 
 - **Next.js**: React-based framework for building the application.

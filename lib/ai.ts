@@ -53,7 +53,7 @@ export async function getForm(prompt: string, context?: any) {
         content: `Generate a form, ${prompt}`,
       },
     ],
-    model: "llama3-70b-8192",
+    model: "llama-3.1-8b-instant",
     temperature: 0,
     stream: false,
     response_format: { type: "json_object" },
